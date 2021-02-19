@@ -1,0 +1,133 @@
+Device Property:        D406 (Vendor defined)
+Data Type:              STR
+Get/Set:                Get/Set
+Default Value:          87105110100111119115475446484653515148464832778480671089711511568114105118101114475446484653515148464845
+
+Device Property:        D407 (Vendor defined)
+Data Type:
+Get/Set:                Get
+Default Value:          00000001
+Current Value:          00000001
+
+Device Property:        D303 (Vendor defined)
+Data Type:
+Get/Set:                Get
+Default Value:          01
+Current Value:          01
+
+Device Property:        5001
+Data Type:
+Get/Set:                Get
+Default Value:          64
+Current Value:          64
+Range (Min,Max,Step):           {00, 64, 01}
+
+Device Property:        5003
+Data Type:              STR
+Get/Set:                Get/Set
+Default Value:          5448484812052484848
+Current Value:          5448484812052484848
+Enumeration:            {3000, 3000, 7800, 3400, 3000, 3000, 3000, 0000, 0A00, 0034, 0034, 0039, 0036, 0078, 0033, 0030, 0030, 0030, 0000, 320A, 3900, 3900, 3200, 7800, 3200, 3000, 3000, 3000, 0000
+
+Device Property:        5004
+Data Type:
+Get/Set:                Get/Set
+Default Value:          01
+Current Value:          04
+Enumeration:            {00, 01, 02, 04, 07}
+
+Device Property:        5005
+Data Type:
+Get/Set:                Get/Set
+Default Value:          0002
+Current Value:          0002
+Enumeration:            {0002, 0004, 0005, 0006, 0007, 8010, 8011, 8013}
+
+Device Property:        5007
+Data Type:
+Get/Set:                Get/Set
+Default Value:          015E
+Current Value:          0230
+Enumeration:            {015E, 0190, 01C2, 01F4, 0230, 0276, 02C6, 0320, 0384, 03E8, 044C, 0514, 0578, 0640, 0708, 07D0, 0898}
+
+Device Property:        5008
+Data Type:
+Get/Set:                Get
+Default Value:          00000640
+Current Value:          00000640
+Range (Min,Max,Step):           {00000640, 00007530, 00000001}
+
+Device Property:        500A
+Data Type:
+Get/Set:                Get
+Default Value:          8012
+Current Value:          8010
+Enumeration:            {0001, 8010, 8011, 8012, 8013}
+
+Device Property:        500B
+Data Type:
+Get/Set:                Get/Set
+Default Value:          0003
+Current Value:          0003
+Enumeration:            {0002, 0003, 0004}
+
+Device Property:        500C
+Data Type:
+Get/Set:                Get/Set
+Default Value:          8010
+Current Value:          8010
+Enumeration:            {0004, 8010, 8012}
+
+Device Property:        500D
+Data Type:
+Get/Set:                Get/Set
+Default Value:          00000002
+Current Value:          00000D05
+Enumeration:            {00000002, 00000003, 00000004, 00000005, 00000006, 00000008, 0000000A, 0000000C, 0000000F, 00000014, 00000019, 0000001F, 00000028, 00000032, 0000003E, 00000050, 00000064, 0000007D, 000000A6, 000000C8, 000000FA, 0000014D, 00000190, 000001F4, 0000029A, 00000301, 000003E8, 000004E2, 00000682, 000007D0, 000009C4, 00000D05, 00000FA0, 00001388, 0000186A, 00001E0C, 00002710, 000032C8, 00003E80, 00004E20, 000061A8, 00007530, 00009C40, 0000C350, 0000EA60, 00013880, 000186A0, 0001FBD0, 000249F0, 00030D40, 0003D090, 000493E0, FFFFFFFD, FFFFFFFF}
+
+Device Property:        500E
+Data Type:
+Get/Set:                Get
+Default Value:          8010
+Current Value:          0001
+Enumeration:            {0001, 0002, 0003, 0004, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8019}
+
+Device Property:        500F
+Data Type:
+Get/Set:                Get/Set
+Default Value:          0064
+Current Value:          0640
+Enumeration:            {0064, 00C8, 0190, 0320, 0640, 0C80, 1900, 3200, 6400}
+
+Device Property:        5010
+Data Type:
+Get/Set:                Get/Set
+Default Value:          0000
+Current Value:          0000
+Enumeration:            {EC78, EDC6, EF13, F060, F1AE, F2FB, F448, F596, F6E3, F830, F97E, FACB, FC18, FD66, FEB3, 0000, 014D, 029A, 03E8, 0535, 0682, 07D0, 091D, 0A6A, 0BB8, 0D05, 0E52, 0FA0, 10ED, 123A, 1388}
+
+Device Property:        5011
+Data Type:              STR
+Get/Set:                Get/Set
+Default Value:          50484952484948498448484848484816
+
+Device Property:        5013
+Data Type:
+Get/Set:                Get/Set
+Default Value:          0001
+Current Value:          0001
+Enumeration:            {0001, 0002, 8011, 8014, 8015, 8016}
+
+Device Property:        5018
+Data Type:
+Get/Set:                Get/Set
+Default Value:          0001
+Current Value:          0001
+Range (Min,Max,Step):           {0001, 0064, 0001}
+
+Device Property:        501C
+Data Type:
+Get/Set:                Get/Set
+Default Value:          8011
+Current Value:          8010
+Enumeration:            {0002, 8010, 8011, 8012}
