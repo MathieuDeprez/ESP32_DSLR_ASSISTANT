@@ -1,6 +1,6 @@
 #include "devpropparser.h"
 
-const char *const DevPropParser::dtNames1[] PROGMEM =
+const char *const DevPropParser::dtNames1[] =
     {
         msgUNDEF,
         msgINT8,
@@ -14,7 +14,7 @@ const char *const DevPropParser::dtNames1[] PROGMEM =
         msgINT128,
         msgUINT128};
 
-const char *const DevPropParser::dtNames2[] PROGMEM =
+const char *const DevPropParser::dtNames2[] =
     {
         msgUNDEF,
         msgAINT8,
@@ -28,7 +28,7 @@ const char *const DevPropParser::dtNames2[] PROGMEM =
         msgAINT128,
         msgAUINT128};
 
-const char *const DevPropParser::prNames[] PROGMEM =
+const char *const DevPropParser::prNames[] =
     {
         msgUndefined,
         msgBatteryLevel,
@@ -64,24 +64,19 @@ const char *const DevPropParser::prNames[] PROGMEM =
         msgCopyrightInfo};
 
 void DevPropParser::PrintDataType(uint8_t **pp, uint16_t *pcntdn) {
-    //Serial.println("PrintDataType");
     dataType = *((uint16_t *)(*pp));
     bytesSize = GetDataSize();
 
     E_Notify(PSTR("Data Type:\t\t"), 0x80);
-    //Serial.println(((dataType >> 8) & 0xFF));
     switch (((dataType >> 8) & 0xFF)) {
         case 0x00:
-            //Serial.println("case datatype 0");
             if ((dataType & 0xFF) <= (PTP_DTC_UINT128 & 0xFF)) {
-                //Serial.println("case 0 if yes");
-                //E_Notify((char *)pgm_read_word(&dtNames1[(dataType & 0xFF)]), 0x80);
-                //Serial.println("case 0 if after");
+                E_Notify(dtNames1[dataType & 0xFF], 0x80);
             }
             break;
         case 0x40:
             if ((dataType & 0xFF) <= (PTP_DTC_AUINT128 & 0xFF))
-                E_Notify((char *)pgm_read_word(&dtNames2[(dataType & 0xFF)]), 0x80);
+                E_Notify(dtNames2[dataType & 0xFF], 0x80);
             break;
         case 0xFF:
             E_Notify(PSTR("STR"), 0x80);
@@ -102,7 +97,7 @@ void DevPropParser::PrintDevProp(uint8_t **pp, uint16_t *pcntdn) {
     if ((((op >> 8) & 0xFF) == 0x50) && ((op & 0xFF) <= (PTP_DPC_CopyrightInfo & 0xFF))) {
         PrintHex<uint16_t>(op, 0x80);
         E_Notify(PSTR("\t"), 0x80);
-        //E_Notify((char *)pgm_read_word(&prNames[(op & 0xFF)]), 0x80);
+        E_Notify(prNames[op & 0xFF], 0x80);
         E_Notify(PSTR("\r\n"), 0x80);
     } else {
         PrintHex<uint16_t>(op, 0x80);

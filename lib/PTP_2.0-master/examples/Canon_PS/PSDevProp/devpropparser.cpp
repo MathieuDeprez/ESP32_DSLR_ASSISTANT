@@ -1,6 +1,6 @@
 #include "devpropparser.h"
 
-const char* DevPropParser::dtNames1[] PROGMEM = 
+const char* DevPropParser::dtNames1[]  = 
 {
 	msgUNDEF,
 	msgINT8,	
@@ -15,7 +15,7 @@ const char* DevPropParser::dtNames1[] PROGMEM =
 	msgUINT128
 };
 
-const char* DevPropParser::dtNames2[] PROGMEM = 
+const char* DevPropParser::dtNames2[]  = 
 {
 	msgUNDEF,
 	msgAINT8,
@@ -30,7 +30,7 @@ const char* DevPropParser::dtNames2[] PROGMEM =
 	msgAUINT128
 };
 
-const char* DevPropParser::prNames[] PROGMEM = 
+const char* DevPropParser::prNames[]  = 
 {
 	msgUndefined,					
 	msgBatteryLevel,				
@@ -77,11 +77,11 @@ void DevPropParser::PrintDataType(uint8_t **pp, uint16_t *pcntdn)
 	{
 	case 0x00:
 		if ((dataType & 0xFF) <= (PTP_DTC_UINT128 & 0xFF))
-			E_Notify((char*)pgm_read_word(&dtNames1[(dataType & 0xFF)]),0x80);
+			E_Notify(dtNames1[(dataType & 0xFF)],0x80);
 		break;
 	case 0x40:
 		if ((dataType & 0xFF) <= (PTP_DTC_AUINT128 & 0xFF))
-			E_Notify((char*)pgm_read_word(&dtNames2[(dataType & 0xFF)]),0x80);
+			E_Notify(dtNames2[(dataType & 0xFF)],0x80);
 		break;
 	case 0xFF:
 		E_Notify(PSTR("STR"),0x80);
@@ -104,7 +104,7 @@ void DevPropParser::PrintDevProp(uint8_t **pp, uint16_t *pcntdn)
 	{
 		PrintHex<uint16_t>(op,0x80);
 		E_Notify(PSTR("\t"),0x80);
-		E_Notify((char*)pgm_read_word(&prNames[(op & 0xFF)]),0x80);
+		E_Notify(prNames[(op & 0xFF)],0x80);
 		E_Notify(PSTR("\r\n"),0x80);
 	}
 	else

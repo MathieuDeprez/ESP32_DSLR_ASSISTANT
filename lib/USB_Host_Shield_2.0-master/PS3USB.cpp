@@ -314,11 +314,11 @@ void PS3USB::printReport() { // Uncomment "#define PRINTREPORT" to print the rep
 }
 
 bool PS3USB::getButtonPress(ButtonEnum b) {
-        return (ButtonState & pgm_read_dword(&PS3_BUTTONS[(uint8_t)b]));
+        return (ButtonState & PS3_BUTTONS[(uint8_t)b]);
 }
 
 bool PS3USB::getButtonClick(ButtonEnum b) {
-        uint32_t button = pgm_read_dword(&PS3_BUTTONS[(uint8_t)b]);
+        uint32_t button = PS3_BUTTONS[(uint8_t)b];
         bool click = (ButtonClickState & button);
         ButtonClickState &= ~button; // Clear "click" event
         return click;

@@ -157,10 +157,10 @@ void KeyboardReportParser::Parse(USBHID *hid, bool is_rpt_id __attribute__((unus
                 prevState.bInfo[i] = buf[i];
 };
 
-const uint8_t KeyboardReportParser::numKeys[10] PROGMEM = {'!', '@', '#', '$', '%', '^', '&', '*', '(', ')'};
-const uint8_t KeyboardReportParser::symKeysUp[12] PROGMEM = {'_', '+', '{', '}', '|', '~', ':', '"', '~', '<', '>', '?'};
-const uint8_t KeyboardReportParser::symKeysLo[12] PROGMEM = {'-', '=', '[', ']', '\\', ' ', ';', '\'', '`', ',', '.', '/'};
-const uint8_t KeyboardReportParser::padKeys[5] PROGMEM = {'/', '*', '-', '+', '\r'};
+const uint8_t KeyboardReportParser::numKeys[10]  = {'!', '@', '#', '$', '%', '^', '&', '*', '(', ')'};
+const uint8_t KeyboardReportParser::symKeysUp[12]  = {'_', '+', '{', '}', '|', '~', ':', '"', '~', '<', '>', '?'};
+const uint8_t KeyboardReportParser::symKeysLo[12]  = {'-', '=', '[', ']', '\\', ' ', ';', '\'', '`', ',', '.', '/'};
+const uint8_t KeyboardReportParser::padKeys[5]  = {'/', '*', '-', '+', '\r'};
 
 uint8_t KeyboardReportParser::OemToAscii(uint8_t mod, uint8_t key) {
         uint8_t shift = (mod & 0x22);

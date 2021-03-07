@@ -21,7 +21,7 @@
 //#define PRINTREPORT // Uncomment to print the report send by the Xbox controller
 
 /** Buttons on the controllers */
-const uint8_t XBOXOLD_BUTTONS[] PROGMEM = {
+const uint8_t XBOXOLD_BUTTONS[]  = {
         0x01, // UP
         0x08, // RIGHT
         0x02, // DOWN

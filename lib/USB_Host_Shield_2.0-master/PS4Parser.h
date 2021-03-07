@@ -22,7 +22,7 @@
 #include "controllerEnums.h"
 
 /** Buttons on the controller */
-const uint8_t PS4_BUTTONS[] PROGMEM = {
+const uint8_t PS4_BUTTONS[]  = {
         UP, // UP
         RIGHT, // RIGHT
         DOWN, // DOWN

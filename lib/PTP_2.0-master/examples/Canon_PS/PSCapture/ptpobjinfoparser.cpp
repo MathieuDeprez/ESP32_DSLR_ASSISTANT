@@ -1,6 +1,6 @@
 #include "ptpobjinfoparser.h"
 
-const char* PTPObjInfoParser::acNames[] PROGMEM = 
+const char* PTPObjInfoParser::acNames[]  = 
 {
 	msgUndefined,
 	msgAssociation,	
@@ -18,7 +18,7 @@ const char* PTPObjInfoParser::acNames[] PROGMEM =
 	msgQT			
 };
 
-const char* PTPObjInfoParser::imNames[] PROGMEM = 
+const char* PTPObjInfoParser::imNames[]  = 
 {
 	msgUndefined,
 	msgEXIF_JPEG,			
@@ -46,10 +46,10 @@ void PTPObjInfoParser::PrintFormat(uint16_t op)
 	//E_Notify(msgTab,0x80);
 
 	if ((((op >> 8) & 0xFF) == 0x30) && ((op & 0xFF) <= (PTP_OFC_QT & 0xFF)))
-		E_Notify((char*)pgm_read_word(&acNames[(op & 0xFF)]),0x80);
+		E_Notify(acNames[(op & 0xFF)],0x80);
 	else
 		if ((((op >> 8) & 0xFF) == 0x38) && ((op & 0xFF) <= (PTP_OFC_JPX & 0xFF)))
-			E_Notify((char*)pgm_read_word(&imNames[(op & 0xFF)]),0x80);
+			E_Notify(imNames[(op & 0xFF)],0x80);
 		else
 		{
 			switch (op)

@@ -5,21 +5,21 @@
 #include <ptp.h>
 
 // Storage Types
-const char msgUndefined	[] PROGMEM = "Undefined";
-const char msgFixedROM	[] PROGMEM = "FixedROM";
-const char msgRemovableROM [] PROGMEM = "RemovableROM";
-const char msgFixedRAM	[] PROGMEM = "FixedRAM";
-const char msgRemovableRAM [] PROGMEM = "RemovableRAM";
+const char msgUndefined	[]  = "Undefined";
+const char msgFixedROM	[]  = "FixedROM";
+const char msgRemovableROM []  = "RemovableROM";
+const char msgFixedRAM	[]  = "FixedRAM";
+const char msgRemovableRAM []  = "RemovableRAM";
 
 // File System Types
-const char msgGenericFlat [] PROGMEM = "GenericFlat";
-const char msgGenericHierarchical [] PROGMEM = "GenericHierarchical";
-const char msgDCF [] PROGMEM = "DCF";
+const char msgGenericFlat []  = "GenericFlat";
+const char msgGenericHierarchical []  = "GenericHierarchical";
+const char msgDCF []  = "DCF";
 
 // Access Capability
-const char msgReadWrite [] PROGMEM = "ReadWrite";
-const char msgReadOnly	[] PROGMEM = "ReadOnly";
-const char msgReadOnly_with_Object_Deletion [] PROGMEM = "ReadOnly with Object Deletion";
+const char msgReadWrite []  = "ReadWrite";
+const char msgReadOnly	[]  = "ReadOnly";
+const char msgReadOnly_with_Object_Deletion []  = "ReadOnly with Object Deletion";
 
 
 class PTPStorageInfoParser : public PTPReadParser

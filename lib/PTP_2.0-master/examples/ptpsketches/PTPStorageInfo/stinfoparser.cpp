@@ -1,6 +1,6 @@
 #include "stinfoparser.h"
 
-const char* const PTPStorageInfoParser::stNames[] PROGMEM =
+const char* const PTPStorageInfoParser::stNames[]  =
 {
 	msgUndefined,
 	msgFixedROM,
@@ -9,7 +9,7 @@ const char* const PTPStorageInfoParser::stNames[] PROGMEM =
 	msgRemovableRAM	
 };
 
-const char* const PTPStorageInfoParser::fstNames[] PROGMEM =
+const char* const PTPStorageInfoParser::fstNames[]  =
 {
 	msgUndefined,
 	msgGenericFlat,			
@@ -17,7 +17,7 @@ const char* const PTPStorageInfoParser::fstNames[] PROGMEM =
 	msgDCF					
 };
 
-const char* const PTPStorageInfoParser::acNames[] PROGMEM =
+const char* const PTPStorageInfoParser::acNames[]  =
 {
 	msgUndefined,
 	msgReadWrite,						
@@ -83,7 +83,7 @@ void PTPStorageInfoParser::PrintStorageType(uint8_t **pp, uint16_t *pcntdn)
 	uint16_t	type = *((uint16_t*)*pp);
 
 	if (type <= PTP_ST_RemovableRAM) {
-		E_Notify((char*)pgm_read_word(&stNames[type]), 0x80);
+		E_Notify(stNames[type], 0x80);
         }
 	else {
 		E_Notify(PSTR("Vendor Defined"), 0x80);
@@ -103,7 +103,7 @@ void PTPStorageInfoParser::PrintFileSystemType(uint8_t **pp, uint16_t *pcntdn)
 	uint16_t	type = *((uint16_t*)*pp);
 
 	if (type <= PTP_FST_DCF) {
-		E_Notify((char*)pgm_read_word(&fstNames[type]), 0x80);
+		E_Notify(fstNames[type], 0x80);
         }
 	else {
 		E_Notify(PSTR("Vendor Defined"), 0x80);
@@ -122,7 +122,7 @@ void PTPStorageInfoParser::PrintAccessCapability(uint8_t **pp, uint16_t *pcntdn)
 	uint16_t	type = *((uint16_t*)*pp);
 
 	if (type <= PTP_AC_ReadOnly_with_Object_Deletion) {
-		E_Notify((char*)pgm_read_word(&acNames[type]), 0x80);
+		E_Notify(acNames[type], 0x80);
         }
 	else {
 		E_Notify(PSTR("Vendor Defined"), 0x80);

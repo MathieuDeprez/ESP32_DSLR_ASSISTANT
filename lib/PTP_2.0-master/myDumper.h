@@ -22,20 +22,18 @@ Web      :  http://www.circuitsathome.com
 e-mail   :  support@circuitsathome.com
  */
 
-#if !defined(_usb_h_) || defined(__HEXDUMP_H__)
-#error "Never include hexdump.h directly; include Usb.h instead"
-#else
-#define __HEXDUMP_H__
-
+#ifndef MY_DUMPER_H
+#define MY_DUMPER_H
+#include <Arduino.h>
 extern int UsbDEBUGlvl;
 
 template <class BASE_CLASS, class LEN_TYPE, class OFFSET_TYPE>
-class HexDumper : public BASE_CLASS {
+class MyDumper : public BASE_CLASS {
     uint8_t byteCount;
     OFFSET_TYPE byteTotal;
 
    public:
-    HexDumper() : byteCount(0), byteTotal(0){};
+    MyDumper() : byteCount(0), byteTotal(0){};
 
     void Initialize() {
         byteCount = 0;
@@ -46,25 +44,30 @@ class HexDumper : public BASE_CLASS {
 };
 
 template <class BASE_CLASS, class LEN_TYPE, class OFFSET_TYPE>
-void HexDumper<BASE_CLASS, LEN_TYPE, OFFSET_TYPE>::Parse(const LEN_TYPE len, const uint8_t *pbuf, const OFFSET_TYPE &offset __attribute__((unused))) {
-    if (UsbDEBUGlvl >= 0x80) {  // Fully bypass this block of code if we do not debug.
+void MyDumper<BASE_CLASS, LEN_TYPE, OFFSET_TYPE>::Parse(const LEN_TYPE len, const uint8_t *pbuf, const OFFSET_TYPE &offset __attribute__((unused))) {
+    for (LEN_TYPE j = 12; j < len; j++, byteCount++, byteTotal++) {
+        //PrintHex<uint8_t>(pbuf[j], 0x80);
+        Serial.printf("%02x ", pbuf[j]);
+        //E_Notify(PSTR(" "), 0x80);
+
+        if (byteCount == 15) {
+            Serial.println();
+            //E_Notify(PSTR("\r\n"), 0x80);
+            byteCount = 0xFF;
+        }
+    }
+
+    /*if (UsbDEBUGlvl >= 0x80) {  // Fully bypass this block of code if we do not debug.
         for (LEN_TYPE j = 0; j < len; j++, byteCount++, byteTotal++) {
-            /*if (!byteCount) {
-                PrintHex<OFFSET_TYPE>(byteTotal, 0x80);
-                E_Notify(PSTR(": "), 0x80);
-            }
-            Serial.print(" | ");
-*/
             PrintHex<uint8_t>(pbuf[j], 0x80);
             E_Notify(PSTR(" "), 0x80);
 
-            //Serial.print(" || ");
             if (byteCount == 15) {
                 E_Notify(PSTR("\r\n"), 0x80);
                 byteCount = 0xFF;
             }
         }
-    }
+    }*/
 }
 
-#endif  // __HEXDUMP_H__
+#endif  // MY_DUMPER_H

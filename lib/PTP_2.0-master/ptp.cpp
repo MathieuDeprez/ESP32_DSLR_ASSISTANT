@@ -336,6 +336,8 @@ void PTP::Task() {
 uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = NULL, void *pVoid = NULL) {
     //Serial.print("pcode");
     //Serial.println(params[0]);
+    //Serial.println("/debut trans");
+
     uint8_t rcode;
     {                                            // send command block
                                                  // Serial.print("Transaction: Send Command\r\n");
@@ -383,6 +385,7 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
                 //Serial.print("Transaction: pVoid is NULL\n");
                 return PTP_RC_GeneralError;
             }
+
             ZerroMemory(PTP_MAX_RX_BUFFER_LEN, data);
 
             uint32_t bytes_left = (flags->typeOfVoid == 3) ? PTP_USB_BULK_HDR_LEN + flags->dataSize : ((flags->typeOfVoid == 1) ? PTP_USB_BULK_HDR_LEN + ((PTPDataSupplier *)pVoid)->GetDataSize() : 12);
@@ -406,9 +409,10 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
             if (flags->typeOfVoid == 3) {
                 uint8_t *p1 = (data + PTP_USB_BULK_HDR_LEN);
                 uint8_t *p2 = (uint8_t *)pVoid;
-
-                for (uint8_t i = flags->dataSize; i; i--, p1++, p2++)
+                Serial.println("flags->typeOfVoid == 3");
+                for (uint8_t i = flags->dataSize; i; i--, p1++, p2++) {
                     *p1 = *p2;
+                }
 
                 len = PTP_USB_BULK_HDR_LEN + flags->dataSize;
             }  // if (flags->typeOfVoid == 3...
@@ -423,8 +427,8 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
 
                 if (rcode) {
                     //PTPTRACE2("Transaction: Data block send error.", rcode);
-                    //Serial.print("Transaction: Data block send error.: ");
-                    //Serial.println(rcode);
+                    Serial.print("Transaction: Data block send error.: ");
+                    Serial.println(rcode);
                     return PTP_RC_GeneralError;
                 }
 
@@ -444,6 +448,19 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
         // uint8_t		timeoutcnt = 0;
 
         while (1) {
+            /*Serial.print("\n##t: ");
+            Serial.print(total);
+            Serial.print(" ||do: ");
+            Serial.print(data_off);
+            Serial.print(" ||lo: ");
+            Serial.print(loops);
+            Serial.print(" ");
+            for (int k = 0; k < 48; k++) {
+                Serial.print(data[k]);
+                Serial.print(" ");
+            }
+            Serial.println();
+*/
             ZerroMemory(PTP_MAX_RX_BUFFER_LEN, data);
 
             uint16_t read = PTP_MAX_RX_BUFFER_LEN;
@@ -455,8 +472,8 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
 
                 // in some cases NAK handling might be necessary
                 //PTPTRACE2("Transaction: Response receive error 1", rcode);
-                //Serial.print("Transaction: Response receive error 1: ");
-                //Serial.println(rcode);
+                Serial.print("Transaction: Response receive error 1: ");
+                Serial.println(rcode);
                 return PTP_RC_GeneralError;
             }
 
@@ -465,14 +482,24 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
                 uint16_t response = *((uint16_t *)(data + PTP_CONTAINER_OPCODE_OFF));
 
                 if (response == PTP_RC_OK && *pd32 > PTP_USB_BULK_HDR_LEN) {
+                    Serial.println("response with parameter !!");
                     // number of params = (container length - 12) / 4
                     uint8_t n = (*pd32 - PTP_USB_BULK_HDR_LEN) >> 2;
+                    // 1 paramète = 4 bytes (0xFF 0xFF 0xFF 0xFF)
 
                     // BUG: n should be checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     flags->rsParams = n;
-
-                    for (uint32_t *p1 = (uint32_t *)(data + PTP_USB_BULK_HDR_LEN), *p2 = (uint32_t *)params; n; n--, p1++, p2++)
+                    /*Serial.print("params: ");
+                    Serial.print(*params);
+                    Serial.print("pd32: ");
+                    Serial.print(*pd32);
+                    Serial.print(" ||n: ");
+                    Serial.println(n);*/
+                    for (uint32_t *p1 = (uint32_t *)(data + PTP_USB_BULK_HDR_LEN), *p2 = (uint32_t *)params; n; n--, p1++, p2++) {
+                        //Serial.print(*p1, HEX);
+                        //Serial.print(" # ");
                         p2 = p1;
+                    }
                 }
                 if (response != PTP_RC_OK) {
                     //PTPTRACE2("Transaction: Response receive error 2", response);
@@ -491,31 +518,33 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
             }
 
             if (pVoid) {
-                //Serial.println("a7");
                 if (flags->typeOfVoid == 0x01) {
-                    //Serial.println("a5");
-                    //Serial.print("inbuffer: ");
-                    //Serial.print(inbuffer);
-                    //Serial.print(" || data: ");
-                    //for (int i=0; i<64; i++){
-                    //    Serial.print(data[i]);
-                   // }
-                    //Serial.print(" || data_off: ");
-                    //Serial.println(data_off);
                     ((PTPReadParser *)pVoid)->Parse(inbuffer, data, (const uint32_t &)data_off);
-                    //Serial.println("a6");
                 }
-                if (flags->typeOfVoid == 0x03)
+                if (flags->typeOfVoid == 0x03) {
                     for (uint32_t i = 0, j = data_off; i < inbuffer && j < flags->dataSize; i++, j++)
                         ((uint8_t *)pVoid)[j] = data[i];
+                } else if (flags->typeOfVoid == 0x04) {
+                    //Serial.println("flags->typeOfVoid == 4");
+                    int numberEvent = min((inbuffer - 14) / 6, 6);
+
+                    //for (uint32_t i = 16, j = 0; i < inbuffer; i++, j++) {
+                    for (int i = 0; i < numberEvent; i++) {
+                        /*Serial.print(data[i * 6 + 16], HEX);
+                        Serial.print("|");
+                        Serial.print(data[i * 6 + 17], HEX);
+                        Serial.print("^");*/
+                        ((uint8_t *)pVoid)[i * 2] = data[i * 6 + 16];
+                        ((uint8_t *)pVoid)[i * 2 + 1] = data[i * 6 + 17];
+                    }
+                }
             }
-            //Serial.println("a10");
+
             data_off += inbuffer;
 
             loops++;
-            //delay(10);
-        }  // while(1)
-    }      // end of scope
+        }
+    }  // end of scope
 }
 
 uint16_t PTP::EventCheck(PTPReadParser *pParser) {
@@ -850,6 +879,23 @@ uint16_t PTP::GetDevicePropValue(const uint16_t pcode, uint16_t &val) {
     return ptp_error;
 }
 
+uint16_t PTP::GetDevicePropValue(const uint16_t pcode, char val[11]) {
+    uint16_t ptp_error = PTP_RC_GeneralError;
+    OperFlags flags = {1, 0, 0, 0, 3, 34};
+    uint32_t params[1];
+    uint8_t buf[34];
+
+    params[0] = pcode;
+
+    if ((ptp_error = Transaction(PTP_OC_GetDevicePropValue, &flags, params, buf)) == PTP_RC_OK) {
+        for (int p = 13, i = 0; p < sizeof(buf) - 1; p += 2, i++) {
+            val[i] = buf[p];
+        }
+    }
+
+    return ptp_error;
+}
+
 uint16_t PTP::GetDevicePropValue(const uint16_t pcode, uint32_t &val) {
     uint16_t ptp_error = PTP_RC_GeneralError;
     OperFlags flags = {1, 0, 0, 0, 3, 16};
@@ -904,6 +950,14 @@ uint16_t PTP::GetDevicePropValue(const uint16_t pcode, int32_t &val) {
         val = buf[3];
 
     return ptp_error;
+}
+
+uint16_t PTP::SetDevicePropValue(uint16_t pcode, const uint8_t val[19]) {
+    OperFlags flags = {1, 0, 1, 1, 3, 19};
+    uint32_t params[1];
+    params[0] = (uint32_t)pcode;
+
+    return Transaction(PTP_OC_SetDevicePropValue, &flags, params, (void *)val);
 }
 
 uint16_t PTP::SetDevicePropValue(uint16_t pcode, uint8_t val) {
@@ -1015,6 +1069,7 @@ uint16_t PTP::CaptureImage() {
 
     if ((ptp_error = Transaction(PTP_OC_InitiateCapture, &flags, params)) != PTP_RC_OK) {
         PTPTRACE2("CaptureImage error", ptp_error);
+        Serial.println("CaptureImage error");
         return ptp_error;
     }
     PTPUSBEventContainer evnt;

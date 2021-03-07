@@ -1,6 +1,6 @@
 #include "devinfoparser.h"
 
-const char* const DevInfoParser::ptpopNames[] PROGMEM = 
+const char* const DevInfoParser::ptpopNames[]  = 
 {
 	msgUndefined,				
 	msgGetDeviceInfo,			
@@ -33,7 +33,7 @@ const char* const DevInfoParser::ptpopNames[] PROGMEM =
 	msgInitiateOpenCapture	
 };
 
-const char* const DevInfoParser::mtpopNames[] PROGMEM = 
+const char* const DevInfoParser::mtpopNames[]  = 
 {
 	msgUndefined,				
 	msgGetObjectPropsSupported,	
@@ -46,7 +46,7 @@ const char* const DevInfoParser::mtpopNames[] PROGMEM =
 	msgSendObjectPropList		
 };
 
-const char* const DevInfoParser::ptpevNames[] PROGMEM = 
+const char* const DevInfoParser::ptpevNames[]  = 
 {
 	msgUndefined,
 	msgCancelTransaction,
@@ -65,7 +65,7 @@ const char* const DevInfoParser::ptpevNames[] PROGMEM =
 	msgUnreportedStatus
 };
 
-const char* const DevInfoParser::mtpevNames[] PROGMEM = 
+const char* const DevInfoParser::mtpevNames[]  = 
 {
 	msgUndefined,
 	msgObjectPropChanged,		
@@ -73,7 +73,7 @@ const char* const DevInfoParser::mtpevNames[] PROGMEM =
 	msgObjectReferencesChanged
 };
 
-const char* const DevInfoParser::ptpprNames[] PROGMEM = 
+const char* const DevInfoParser::ptpprNames[]  = 
 {
 	msgUndefined,					
 	msgBatteryLevel,				
@@ -109,7 +109,7 @@ const char* const DevInfoParser::ptpprNames[] PROGMEM =
 	msgCopyrightInfo				
 };
 
-const char* const DevInfoParser::mtpprNames[] PROGMEM = 
+const char* const DevInfoParser::mtpprNames[]  = 
 {
 	msgUndefined,					
 	msgSynchronization_Partner,		
@@ -124,7 +124,7 @@ const char* const DevInfoParser::mtpprNames[] PROGMEM =
 	msgPlayback_Container			
 };
 
-const char* const DevInfoParser::acNames[] PROGMEM = 
+const char* const DevInfoParser::acNames[]  = 
 {
 	msgUndefined,
 	msgAssociation,	
@@ -142,7 +142,7 @@ const char* const DevInfoParser::acNames[] PROGMEM =
 	msgQT			
 };
 
-const char* const DevInfoParser::imNames[] PROGMEM = 
+const char* const DevInfoParser::imNames[]  = 
 {
 	msgUndefined,
 	msgEXIF_JPEG,			
@@ -239,7 +239,7 @@ bool DevInfoParser::PrintPTPOperation(uint16_t op)
 {
 	if ((op & 0xFF) <= (PTP_OC_InitiateOpenCapture & 0xFF))
 	{
-		E_Notify((char*)pgm_read_word(&ptpopNames[(op & 0xFF)]), 0x80);
+		E_Notify(ptpopNames[(op & 0xFF)], 0x80);
 		return true;
 	}
 	return false;
@@ -248,7 +248,7 @@ bool DevInfoParser::PrintPTPOperation(uint16_t op)
 bool DevInfoParser::PrintMTPOperation(uint16_t op)
 {
 	if ((op & 0xFF) <= (MTP_OC_SendObjectPropList & 0xFF))
-		E_Notify((char*)pgm_read_word(&mtpopNames[(op & 0xFF)]), 0x80);
+		E_Notify(mtpopNames[(op & 0xFF)], 0x80);
 	else
 	{
 		switch (op)
@@ -378,10 +378,10 @@ void DevInfoParser::PrintEvent(uint16_t op)
 	E_Notify(msgTab, 0x80);
 
 	if ((((op >> 8) & 0xFF) == 0x40) && ((op & 0xFF) <= (PTP_EC_UnreportedStatus & 0xFF)))
-		E_Notify((char*)pgm_read_word(&ptpevNames[(op & 0xFF)]), 0x80);
+		E_Notify(ptpevNames[(op & 0xFF)], 0x80);
 	else
 		if ((((op >> 8) & 0xFF) == 0xC8) && ((op & 0xFF) <= (MTP_EC_ObjectReferencesChanged & 0xFF)))
-			E_Notify((char*)pgm_read_word(&mtpevNames[(op & 0xFF)]), 0x80);
+			E_Notify(mtpevNames[(op & 0xFF)], 0x80);
 		else
 			E_Notify(msgVendorDefined, 0x80);
 	E_Notify(msgCRLF, 0x80);
@@ -393,12 +393,12 @@ void DevInfoParser::PrintDevProp(uint16_t op)
 	E_Notify(msgTab, 0x80);
 
 	if ((((op >> 8) & 0xFF) == 0x50) && ((op & 0xFF) <= (PTP_DPC_CopyrightInfo & 0xFF)))
-		E_Notify((char*)pgm_read_word(&ptpprNames[(op & 0xFF)]), 0x80);
+		E_Notify(ptpprNames[(op & 0xFF)], 0x80);
 	else
 		if (((op >> 8) & 0xFF) == 0xD4) 
 		{
 			if ( (op & 0xFF) <= (MTP_DPC_Perceived_Device_Type & 0xFF) )
-				E_Notify((char*)pgm_read_word(&mtpprNames[(op & 0xFF)]), 0x80);
+				E_Notify(mtpprNames[(op & 0xFF)], 0x80);
 			else
 			{
 				switch (op)
@@ -429,10 +429,10 @@ void DevInfoParser::PrintFormat(uint16_t op)
 	E_Notify(msgTab, 0x80);
 
 	if ((((op >> 8) & 0xFF) == 0x30) && ((op & 0xFF) <= (PTP_OFC_QT & 0xFF)))
-		E_Notify((char*)pgm_read_word(&acNames[(op & 0xFF)]), 0x80);
+		E_Notify(acNames[(op & 0xFF)], 0x80);
 	else
 		if ((((op >> 8) & 0xFF) == 0x38) && ((op & 0xFF) <= (PTP_OFC_JPX & 0xFF)))
-			E_Notify((char*)pgm_read_word(&imNames[(op & 0xFF)]), 0x80);
+			E_Notify(imNames[(op & 0xFF)], 0x80);
 		else
 		{
 			switch (op)

@@ -104,12 +104,12 @@ e-mail   :  support@circuitsathome.com
 #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 #if GCC_VERSION < 40602 // Test for GCC < 4.6.2
-#ifdef PROGMEM
-#undef PROGMEM
-#define PROGMEM __attribute__((section(".progmem.data"))) // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734#c4
+#ifdef 
+#undef 
+#define  __attribute__((section("..data"))) // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734#c4
 #ifdef PSTR
 #undef PSTR
-#define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];})) // Copied from pgmspace.h in avr-libc source
+#define PSTR(s) (__extension__({static const char __c[]  = (s); &__c[0];})) // Copied from pgmspace.h in avr-libc source
 #endif
 #endif
 #endif
@@ -196,8 +196,8 @@ extern SPI_HandleTypeDef SPI_Handle; // Needed to be declared in your main.cpp
 
 // Workaround issue: https://github.com/esp8266/Arduino/issues/2078
 #ifdef ESP8266
-#undef PROGMEM
-#define PROGMEM
+#undef 
+#define 
 #undef PSTR
 #define PSTR(s) (s)
 #undef pgm_read_byte

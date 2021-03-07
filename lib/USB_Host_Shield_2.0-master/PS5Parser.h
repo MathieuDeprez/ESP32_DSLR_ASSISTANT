@@ -27,7 +27,7 @@
 #include "PS5Trigger.h"
 
 /** Buttons on the controller */
-const uint8_t PS5_BUTTONS[] PROGMEM = {
+const uint8_t PS5_BUTTONS[]  = {
         UP, // UP
         RIGHT, // RIGHT
         DOWN, // DOWN

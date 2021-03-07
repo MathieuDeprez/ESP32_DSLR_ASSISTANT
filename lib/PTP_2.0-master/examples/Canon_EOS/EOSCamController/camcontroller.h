@@ -11,30 +11,30 @@
 #include <eosvaluetitles.h>
 #include "menu.h"
 
-const char msgSetSelf[]     PROGMEM = "SELF";
-const char msgSetFrames[]   PROGMEM = "FRMS";
-const char msgSetBkt[]      PROGMEM = "BKT";
-const char msgSetInterval[] PROGMEM = "INT";
-const char msgExit[]        PROGMEM = "EXIT";
-const char msgSetRun[]      PROGMEM = "RUN ";
-const char msgAbort[]       PROGMEM = "ABORT";
-const char msgLeft[]        PROGMEM = "LEFT";
+const char msgSetSelf[]      = "SELF";
+const char msgSetFrames[]    = "FRMS";
+const char msgSetBkt[]       = "BKT";
+const char msgSetInterval[]  = "INT";
+const char msgExit[]         = "EXIT";
+const char msgSetRun[]       = "RUN ";
+const char msgAbort[]        = "ABORT";
+const char msgLeft[]         = "LEFT";
 
-const char msgError[]       PROGMEM = "ERROR:";
-const char msgCamera[]      PROGMEM = "CAMERA";
-const char msgDisconnected[] PROGMEM = "DISCONNECTED";
+const char msgError[]        = "ERROR:";
+const char msgCamera[]       = "CAMERA";
+const char msgDisconnected[]  = "DISCONNECTED";
 
-const char msgSelfTimer[]   PROGMEM = "SELF TIMER h/m/s";
-const char msgBracketing[]  PROGMEM = "BKT(RANGE/STEP)";
-const char msgSteps[]       PROGMEM = "steps";
-const char msgCntFrames[]   PROGMEM = "FRAMES";
-const char msgIntTimer[]    PROGMEM = "INT TIMER h/m/s";
+const char msgSelfTimer[]    = "SELF TIMER h/m/s";
+const char msgBracketing[]   = "BKT(RANGE/STEP)";
+const char msgSteps[]        = "steps";
+const char msgCntFrames[]    = "FRAMES";
+const char msgIntTimer[]     = "INT TIMER h/m/s";
 
 #ifndef NO_SETTINGS_SCREEN
-const char msgIntervalometer[] PROGMEM = "INTERVAL";
-const char msgSettings[]    PROGMEM = "SETTINGS";
-const char msgClock[]       PROGMEM = "CLOCK";
-const char msgEV[]          PROGMEM = "EV";
+const char msgIntervalometer[]  = "INTERVAL";
+const char msgSettings[]     = "SETTINGS";
+const char msgClock[]        = "CLOCK";
+const char msgEV[]           = "EV";
 #endif
 
 typedef KeyValuePairDataItem<VT_EXPCOMP, VT_EXPCOMP_COUNT, VT_EXPCOMP_TEXT_LEN>    EXP_COMP_DATA_ITEM;            // Exposure compensation data item type

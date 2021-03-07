@@ -66,11 +66,11 @@ const char* FindTitle(uint8_t size, const ValueTitle<ValueType, TitleSize>* p, V
                     return (const char*)p[i].title;
                 break;
             case 2:
-                if (pgm_read_word(&(p[i].value)) == val)
+                if (p[i].value == val)
                     return (const char*)p[i].title;
                 break;
             case 4:
-                if (pgm_read_dword(&(p[i].value)) == val)
+                if (p[i].value == val)
                     return (const char*)p[i].title;
                 break;
         }
@@ -85,11 +85,13 @@ class EEPROMByteList {
 
     uint16_t GetValueAddress(uint8_t val) {
         uint16_t tail = listOffset + listSize + 2;
-/*
-        for (uint16_t i = listOffset + 1; i < tail; i++)
-            if (eeprom_read_byte((uint8_t*)i) == val)
-                return i;
-*/
+
+        Serial.print("\n/// val01: ");
+        Serial.println(val);
+        //for (uint16_t i = listOffset + 1; i < tail; i++)
+        //    if (eeprom_read_byte((uint8_t*)i) == val)
+        //        return i;
+
         return 0xffff;
     };
 
@@ -104,7 +106,10 @@ class EEPROMByteList {
 
     void SetSize(uint8_t size) {
         listSize = (size < maxListSize) ? size : maxListSize;
-/*
+
+        Serial.print("\n/// size01: ");
+        Serial.println(size);
+        /*
         if (eeprom_read_byte((uint8_t*)listOffset) != listSize)
             eeprom_write_byte((uint8_t*)listOffset, listSize);*/
     };
@@ -120,7 +125,10 @@ class EEPROMByteList {
     void Set(uint8_t i, uint8_t val) {
         if (i < listSize) {
             uint16_t pos = listOffset + i + 1;
-/*
+
+            Serial.print("\n/// val02: ");
+            Serial.println(val);
+            /*
             if (eeprom_read_byte((uint8_t*)pos) != val)
                 eeprom_write_byte((uint8_t*)pos, val);*/
         }
@@ -131,13 +139,16 @@ class EEPROMByteList {
 
         uint16_t tail = listOffset + listSize;
 
+        Serial.print("\n/// val02: ");
+        Serial.println(val);
+
         /*if (addr == 0xffff)
             return eeprom_read_byte((uint8_t*)tail);
 */
         addr += di;
 
         //return eeprom_read_byte((uint8_t*)((addr > tail) ? tail : addr));
-		return 0;
+        return 0;
     };
 
     uint8_t GetPrev(uint8_t val, uint8_t di = 1) {

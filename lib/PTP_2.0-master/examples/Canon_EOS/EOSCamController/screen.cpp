@@ -6,7 +6,7 @@ bool                 Screen::screenChanged   = true;
 
 Screen::Screen(const uint8_t num_items, ScreenItem *pItems) : numItems(num_items)
 { 
-    screenItems = (ScreenItem*)pgm_read_word(pItems);
+    screenItems = pItems;
     
     if (totalScreens < MAX_SCREENS) 
         screenPool2[totalScreens++] = this;

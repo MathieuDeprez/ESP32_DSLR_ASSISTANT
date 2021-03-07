@@ -37,7 +37,7 @@ typedef uint8_t    VT_EXPCOMP;
 #define VT_EXPCOMP_TEXT_LEN       7
 #define VT_APT_TEXT_LEN           4
 
-const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[] PROGMEM = 
+const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[]  = 
 {
 	{0x00,	{' ', ' ', '0', 0 }	},
 	{0x08,	{' ', ' ', '1', 0 } },
@@ -95,7 +95,7 @@ const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[] PROGMEM =
 	{0x70,	{' ', '9', '1', 0 }	}
 };
 
-const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[] PROGMEM =
+const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[]  =
 {
 	{0x0c,	{'B','u','l','b',0} },
 	{0x10,	{' ','3','0','"',0} },
@@ -173,7 +173,7 @@ const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[] PROGMEM =
 	{0xA0,	{'8','0','0','0',0} }
 };
 
-const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[] PROGMEM =
+const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[]  =
 {
 	{0x28,	{'6',' ',' ',' ',0} },
 	{0x30,	{'1','2',' ',' ',0} },
@@ -197,7 +197,7 @@ const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[] PROGMEM =
 };
 
 // Exposure Compensation Title Array
-const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[] PROGMEM =
+const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[]  =
 {
 	{0x28,	{'+','5',' ',' ',' ',' ',0} },				
 	{0x25,	{'+','4',' ','2','/','3',0} },				
@@ -239,7 +239,7 @@ const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[] PROGMEM =
 };
 
 // Shooting Mode Title Array
-const ValueTitle<VT_MODE, VT_MODE_TEXT_LEN> ModeTitles[] PROGMEM =
+const ValueTitle<VT_MODE, VT_MODE_TEXT_LEN> ModeTitles[]  =
 {
 	{0,	{'P',' ',' ',0} },            // Program
 	{1,	{'T','v',' ',0} },            // Tv
@@ -259,7 +259,7 @@ const ValueTitle<VT_MODE, VT_MODE_TEXT_LEN> ModeTitles[] PROGMEM =
 };
 
 // White Balance Title Array
-const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[] PROGMEM = 
+const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[]  = 
 { 
 	{0,	{'A','W','B',0} },            // Auto White Balance
 	{1,	{'D','a','y',0} },            // Daylight
@@ -272,7 +272,7 @@ const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[] PROGMEM =
 };
 
 // Picture Style Title Array
-const ValueTitle<VT_PSTYLE, VT_PSTYLE_TEXT_LEN> PStyleTitles[] PROGMEM = 
+const ValueTitle<VT_PSTYLE, VT_PSTYLE_TEXT_LEN> PStyleTitles[]  = 
 { 
 	{0x21,	{'U','s','1',0} },            // User 1
 	{0x22,	{'U','s','2',0} },            // User 2

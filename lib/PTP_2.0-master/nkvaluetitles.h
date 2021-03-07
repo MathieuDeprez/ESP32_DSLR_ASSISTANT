@@ -47,14 +47,14 @@ typedef uint8_t			VT_FOCUSAREA;
 //2896x1944
 //1936x1296
 
-const ValueTitle<VT_FOCUSAREA, VT_FOCUSAREA_TEXT_LEN> FocusAreaTitles[] PROGMEM = 
+const ValueTitle<VT_FOCUSAREA, VT_FOCUSAREA_TEXT_LEN> FocusAreaTitles[]  = 
 {
 	{0x00,	{'_', '+', '_', 0 }	},
 	{0x01,	{'+', '_', '_', 0 }	},
 	{0x02,	{'_', '_', '+', 0 }	}
 };
 
-const ValueTitle<VT_FOCUSMODE, VT_FOCUSMODE_TEXT_LEN> FocusModeTitles[] PROGMEM = 
+const ValueTitle<VT_FOCUSMODE, VT_FOCUSMODE_TEXT_LEN> FocusModeTitles[]  = 
 {
 	{0x00,	{'A', 'F', '-', 'S', 0 }	},
 	{0x01,	{'A', 'F', '-', 'C', 0 }	},
@@ -62,7 +62,7 @@ const ValueTitle<VT_FOCUSMODE, VT_FOCUSMODE_TEXT_LEN> FocusModeTitles[] PROGMEM 
 	{0x04,	{'M', 'F', ' ', ' ', 0 }	}
 };
 
-const ValueTitle<VT_COMPRESSION, VT_COMPRESSION_TEXT_LEN> CompressionTitles[] PROGMEM = 
+const ValueTitle<VT_COMPRESSION, VT_COMPRESSION_TEXT_LEN> CompressionTitles[]  = 
 {
 	{0x00,	{'B', 'A', 'S', 'I', 'C', 0 }	},
 	{0x01,	{'N', 'O', 'R', 'M', ' ', 0 }	},
@@ -71,7 +71,7 @@ const ValueTitle<VT_COMPRESSION, VT_COMPRESSION_TEXT_LEN> CompressionTitles[] PR
 	{0x04,	{'R', 'A', 'W', '+', 'B', 0 }	}
 };
 
-const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[] PROGMEM = 
+const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[]  = 
 {
 	{0x015E,	{'3', '.', '5', 0 }	},
 	{0x0190,	{'4', '.', '0', 0 } },
@@ -97,7 +97,7 @@ const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[] PROGMEM =
 	{0x0E10,	{' ', '3', '6', 0 }	}
 };
 
-const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[] PROGMEM =
+const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[]  =
 {
 	{0x00000002,	{'4','0','0','0',0} },
 	{0x00000003,	{'3','2','0','0',0} },
@@ -155,7 +155,7 @@ const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[] PROGMEM =
 };
 
 // 
-const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[] PROGMEM =
+const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[]  =
 {
 	{0x0064,	{' ','1','0','0',0} },
 	{0x007D,	{' ','1','2','5',0} },
@@ -183,7 +183,7 @@ const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[] PROGMEM =
 };
 
 // Exposure Compensation Title Array
-const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[] PROGMEM =
+const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[]  =
 {
 	{0xEC78,	{'+','5','.','0',0} },				
 	{0xEDC6,	{'+','4','.','7',0} },				
@@ -219,7 +219,7 @@ const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[] PROGMEM =
 };
 
 // White Balance Title Array
-const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[] PROGMEM = 
+const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[]  = 
 { 
 	{0x0002,	{'A','W','B',0} },            // Auto White Balance
 	{0x0004,	{'D','a','y',0} },            // Daylight
@@ -232,7 +232,7 @@ const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[] PROGMEM =
 };
 
 // Picture Style Title Array
-const ValueTitle<VT_PSTYLE, VT_PSTYLE_TEXT_LEN> PStyleTitles[] PROGMEM = 
+const ValueTitle<VT_PSTYLE, VT_PSTYLE_TEXT_LEN> PStyleTitles[]  = 
 { 
 	{0x21,	{'U','s','1',0} },            // User 1
 	{0x22,	{'U','s','2',0} },            // User 2

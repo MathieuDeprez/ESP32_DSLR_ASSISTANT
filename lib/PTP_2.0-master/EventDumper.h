@@ -22,20 +22,19 @@ Web      :  http://www.circuitsathome.com
 e-mail   :  support@circuitsathome.com
  */
 
-#if !defined(_usb_h_) || defined(__HEXDUMP_H__)
-#error "Never include hexdump.h directly; include Usb.h instead"
-#else
-#define __HEXDUMP_H__
+#ifndef EVENT_DUMPER_H
+#define EVENT_DUMPER_H
+#include <Arduino.h>
 
 extern int UsbDEBUGlvl;
 
 template <class BASE_CLASS, class LEN_TYPE, class OFFSET_TYPE>
-class HexDumper : public BASE_CLASS {
+class EventDumper : public BASE_CLASS {
     uint8_t byteCount;
     OFFSET_TYPE byteTotal;
 
    public:
-    HexDumper() : byteCount(0), byteTotal(0){};
+    EventDumper() : byteCount(0), byteTotal(0){};
 
     void Initialize() {
         byteCount = 0;
@@ -46,25 +45,46 @@ class HexDumper : public BASE_CLASS {
 };
 
 template <class BASE_CLASS, class LEN_TYPE, class OFFSET_TYPE>
-void HexDumper<BASE_CLASS, LEN_TYPE, OFFSET_TYPE>::Parse(const LEN_TYPE len, const uint8_t *pbuf, const OFFSET_TYPE &offset __attribute__((unused))) {
-    if (UsbDEBUGlvl >= 0x80) {  // Fully bypass this block of code if we do not debug.
-        for (LEN_TYPE j = 0; j < len; j++, byteCount++, byteTotal++) {
-            /*if (!byteCount) {
-                PrintHex<OFFSET_TYPE>(byteTotal, 0x80);
-                E_Notify(PSTR(": "), 0x80);
+void EventDumper<BASE_CLASS, LEN_TYPE, OFFSET_TYPE>::Parse(const LEN_TYPE len, const uint8_t *pbuf, const OFFSET_TYPE &offset __attribute__((unused))) {
+    int numberEvent = (len - 14) / 6;
+    Serial.print("numberEvent: ");
+    Serial.println(numberEvent);
+
+    //int sizeList = sizeof(LIST_EVENT) / sizeof(LIST_EVENT[0]);
+
+    for (LEN_TYPE j = 0; j < numberEvent; j++) {
+        Serial.print("Event ");
+        Serial.print(j + 1);
+        Serial.print(": ");
+
+        uint16_t eventValue = ((uint16_t)pbuf[17 + j * 6] << 8) | pbuf[16 + j * 6];
+
+        Serial.printf("%04x -> ", eventValue);
+
+        /*bool nameFound = false;
+        for (int i = 0; i < sizeList; i++) {
+            if (LIST_EVENT[i].value == eventValue) {
+                Serial.println(LIST_EVENT[i].name);
+                nameFound = true;
+                break;
             }
-            Serial.print(" | ");
-*/
+        }
+        if (!nameFound) {
+            Serial.println("Event Undefinned");
+        }*/
+    }
+
+    /*if (UsbDEBUGlvl >= 0x80) {  // Fully bypass this block of code if we do not debug.
+        for (LEN_TYPE j = 0; j < len; j++, byteCount++, byteTotal++) {
             PrintHex<uint8_t>(pbuf[j], 0x80);
             E_Notify(PSTR(" "), 0x80);
 
-            //Serial.print(" || ");
             if (byteCount == 15) {
                 E_Notify(PSTR("\r\n"), 0x80);
                 byteCount = 0xFF;
             }
         }
-    }
+    }*/
 }
 
-#endif  // __HEXDUMP_H__
+#endif  // MY_DUMPER_H

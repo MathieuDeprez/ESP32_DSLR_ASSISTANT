@@ -21,7 +21,7 @@
 //#define PRINTREPORT // Uncomment to print the report send by the Xbox One S Controller
 
 /** Buttons on the controller */
-const uint8_t XBOX_ONE_S_BUTTONS[] PROGMEM = {
+const uint8_t XBOX_ONE_S_BUTTONS[]  = {
         UP, // UP
         RIGHT, // RIGHT
         DOWN, // DOWN

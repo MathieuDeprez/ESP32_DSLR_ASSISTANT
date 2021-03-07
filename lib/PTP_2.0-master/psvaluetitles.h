@@ -48,14 +48,14 @@ typedef uint8_t		VT_CAMOUTPUT;
 #define VT_CAMOUTPUT_TEXT_LEN       4
 
 
-const ValueTitle<VT_CAMOUTPUT, VT_CAMOUTPUT_TEXT_LEN> CamOutputTitles[] PROGMEM = 
+const ValueTitle<VT_CAMOUTPUT, VT_CAMOUTPUT_TEXT_LEN> CamOutputTitles[] = 
 {
 	{0x01,	{'L', 'C', 'D', 0 }	},        // LCD
 	{0x02,	{'O', 'U', 'T', 0 }	},        // Video OUT
 	{0x03,	{'O', 'f', 'f', 0 }	}         // Off
 };
 
-const ValueTitle<VT_COMPQUALITY, VT_COMPQUALITY_TEXT_LEN> CompQualityTitles[] PROGMEM = 
+const ValueTitle<VT_COMPQUALITY, VT_COMPQUALITY_TEXT_LEN> CompQualityTitles[]  = 
 {
 	{0x00,	{'N', '/', 'D', 'e', 'f', 0 }	},		// Not Defined
 	{0x01,	{'E', 'c', 'o', 'n', 'o', 0 }	},		// Econo
@@ -65,14 +65,14 @@ const ValueTitle<VT_COMPQUALITY, VT_COMPQUALITY_TEXT_LEN> CompQualityTitles[] PR
 	{0x05,	{'S', 'u', 'p', 'e', 'r', 0 }	}		// Super Fine
 };
 
-const ValueTitle<VT_FVFILEFORMAT, VT_FVFILEFORMAT_TEXT_LEN> FullViewFileFormatTitles[] PROGMEM = 
+const ValueTitle<VT_FVFILEFORMAT, VT_FVFILEFORMAT_TEXT_LEN> FullViewFileFormatTitles[]  = 
 {
 	{0x00,	{'N', '/', 'D', 0 }	},
 	{0x01,	{'J', 'P', 'G', 0 }	},
 	{0x02,	{'C', 'R', 'W', 0 }	}
 };
 
-const ValueTitle<VT_IMAGESIZE, VT_IMAGESIZE_TEXT_LEN> ImageSizeTitles[] PROGMEM = 
+const ValueTitle<VT_IMAGESIZE, VT_IMAGESIZE_TEXT_LEN> ImageSizeTitles[]  = 
 {
 	{0x00,	{'L', 'a', 'r', 'g', 'e', 0 }	},		// Large
 	{0x01,	{'M', 'e', 'd', '-', '1', 0 }	},		// Medium 1
@@ -81,7 +81,7 @@ const ValueTitle<VT_IMAGESIZE, VT_IMAGESIZE_TEXT_LEN> ImageSizeTitles[] PROGMEM 
 	{0x07,	{'M', 'e', 'd', '-', '3', 0 }	}		// Medium 3
 };
 
-const ValueTitle<VT_STROBE, VT_STROBE_TEXT_LEN> StrobeTitles[] PROGMEM = 
+const ValueTitle<VT_STROBE, VT_STROBE_TEXT_LEN> StrobeTitles[]  = 
 {
 	{0x00,	{'O', 'f', 'f', ' ', ' ', 0 }	},		// Off
 	{0x01,	{'A', 'u', 't', 'o', ' ', 0 }	},		// Auto
@@ -92,7 +92,7 @@ const ValueTitle<VT_STROBE, VT_STROBE_TEXT_LEN> StrobeTitles[] PROGMEM =
 	{0x06,	{'O', 'n', 'R', 'E', ' ', 0 }	}       // On + Red Eye Suppression
 };
 
-const ValueTitle<VT_MODE, VT_MODE_TEXT_LEN> ModeTitles[] PROGMEM =
+const ValueTitle<VT_MODE, VT_MODE_TEXT_LEN> ModeTitles[]  =
 {
 	{0x00,	{'A','u','t','o',0} },		// Auto
 	{0x01,	{'P',' ',' ',' ',0} },		// Program
@@ -137,7 +137,7 @@ const ValueTitle<VT_MODE, VT_MODE_TEXT_LEN> ModeTitles[] PROGMEM =
 	{0xA0,	{'I','n','h','b',0} }		// Flash Inhibit
 };
 
-const ValueTitle<VT_EZOOM, VT_EZOOM_TEXT_LEN> EZoomTitles[] PROGMEM = 
+const ValueTitle<VT_EZOOM, VT_EZOOM_TEXT_LEN> EZoomTitles[]  = 
 {
 	{0x00,	{'O', 'f', 'f', 0 }	},
 	{0x01,	{'x', '2', ' ', 0 }	},
@@ -145,7 +145,7 @@ const ValueTitle<VT_EZOOM, VT_EZOOM_TEXT_LEN> EZoomTitles[] PROGMEM =
 	{0x03,	{'S', 't', 'h', 0 }	}
 };
 
-const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[] PROGMEM = 
+const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[]  = 
 { 
 	{0,	{'A','W','B',0} },      // Auto
 	{1,	{'D','a','y',0} },      // Daylight
@@ -163,7 +163,7 @@ const ValueTitle<VT_WB, VT_WB_TEXT_LEN> WbTitles[] PROGMEM =
 	{0xFF,	{'I','n','v',0} }   // Invalid
 };
 
-const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[] PROGMEM =
+const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[]  =
 {
 	{0x00,	{'A','u','t','o',0} },
 	{0x28,	{'6',' ',' ',' ',0} },
@@ -188,7 +188,7 @@ const ValueTitle<VT_ISO, VT_ISO_TEXT_LEN> IsoTitles[] PROGMEM =
 	{0x78,	{'6','4','0','0',0} }
 };
 
-const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[] PROGMEM = 
+const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[]  = 
 {
 	{0x00,	{' ', ' ', '0', 0 }	},
 	{0x08,	{' ', ' ', '1', 0 } },
@@ -246,7 +246,7 @@ const ValueTitle<VT_APERTURE, VT_APT_TEXT_LEN> ApertureTitles[] PROGMEM =
 	{0x70,	{' ', '9', '1', 0 }	}
 };
 
-const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[] PROGMEM =
+const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[]  =
 {
 	{0x0c,	{'B','u','l','b',0} },
 	{0x10,	{' ','3','0','"',0} },
@@ -324,7 +324,7 @@ const ValueTitle<VT_SHSPEED, VT_SHSPEED_TEXT_LEN> ShutterSpeedTitles[] PROGMEM =
 	{0xA0,	{'8','0','0','0',0} }
 };
 
-const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[] PROGMEM =
+const ValueTitle<VT_EXPCOMP, VT_EXPCOMP_TEXT_LEN> ExpCompTitles[]  =
 {
 	{0x00,	{'+','3',' ',' ',' ',' ',0} },				
 	{0x03,	{'+','2',' ','2','/','3',0} },				

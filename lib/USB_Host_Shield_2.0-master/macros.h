@@ -77,7 +77,7 @@ e-mail   :  support@circuitsathome.com
 #endif
 
 /*
- * Debug macros: Strings are stored in progmem (flash) instead of RAM.
+ * Debug macros: Strings are stored in  (flash) instead of RAM.
  */
 #define USBTRACE(s) (Notify(PSTR(s), 0x80))
 #define USBTRACE1(s,l) (Notify(PSTR(s), l))

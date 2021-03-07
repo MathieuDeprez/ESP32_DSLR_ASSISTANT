@@ -44,9 +44,7 @@ e-mail   :  support@circuitsathome.com
 
 #include <inttypes.h>
 
-#ifndef PROGMEM
-#define PROGMEM
-#endif
+
 #ifndef PGM_P
 #define PGM_P  const char *
 #endif

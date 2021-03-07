@@ -285,7 +285,7 @@ uint8_t XBOXUSB::getButtonPress(ButtonEnum b) {
                 return (uint8_t)(ButtonState >> 8);
         else if(b == R2)
                 return (uint8_t)ButtonState;
-        return (bool)(ButtonState & ((uint32_t)pgm_read_word(&XBOX_BUTTONS[(uint8_t)b]) << 16));
+        return (bool)(ButtonState & (XBOX_BUTTONS[(uint8_t)b] << 16));
 }
 
 bool XBOXUSB::getButtonClick(ButtonEnum b) {
@@ -302,7 +302,7 @@ bool XBOXUSB::getButtonClick(ButtonEnum b) {
                 }
                 return false;
         }
-        uint16_t button = pgm_read_word(&XBOX_BUTTONS[(uint8_t)b]);
+        uint16_t button = XBOX_BUTTONS[(uint8_t)b];
         bool click = (ButtonClickState & button);
         ButtonClickState &= ~button; // clear "click" event
         return click;

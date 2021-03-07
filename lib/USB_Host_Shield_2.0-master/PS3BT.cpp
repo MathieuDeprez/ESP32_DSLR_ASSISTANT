@@ -47,11 +47,11 @@ BluetoothService(p) // Pointer to USB class instance - mandatory
 }
 
 bool PS3BT::getButtonPress(ButtonEnum b) {
-        return (ButtonState & pgm_read_dword(&PS3_BUTTONS[(uint8_t)b]));
+        return (ButtonState & PS3_BUTTONS[(uint8_t)b]);
 }
 
 bool PS3BT::getButtonClick(ButtonEnum b) {
-        uint32_t button = pgm_read_dword(&PS3_BUTTONS[(uint8_t)b]);
+        uint32_t button = PS3_BUTTONS[(uint8_t)b];
         bool click = (ButtonClickState & button);
         ButtonClickState &= ~button; // Clear "click" event
         return click;

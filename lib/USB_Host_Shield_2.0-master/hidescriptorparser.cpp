@@ -17,7 +17,7 @@ e-mail   :  support@circuitsathome.com
 
 #include "hidescriptorparser.h"
 
-const char * const ReportDescParserBase::usagePageTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::usagePageTitles0[]  = {
         pstrUsagePageGenericDesktopControls,
         pstrUsagePageSimulationControls,
         pstrUsagePageVRControls,
@@ -35,7 +35,7 @@ const char * const ReportDescParserBase::usagePageTitles0[] PROGMEM = {
         pstrUsagePageUnicode
 };
 
-const char * const ReportDescParserBase::usagePageTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::usagePageTitles1[]  = {
         pstrUsagePageBarCodeScanner,
         pstrUsagePageScale,
         pstrUsagePageMSRDevices,
@@ -43,7 +43,7 @@ const char * const ReportDescParserBase::usagePageTitles1[] PROGMEM = {
         pstrUsagePageCameraControl,
         pstrUsagePageArcade
 };
-const char * const ReportDescParserBase::genDesktopTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::genDesktopTitles0[]  = {
         pstrUsagePointer,
         pstrUsageMouse,
         pstrUsageJoystick,
@@ -54,7 +54,7 @@ const char * const ReportDescParserBase::genDesktopTitles0[] PROGMEM = {
         pstrUsageTabletPCSystemControls
 
 };
-const char * const ReportDescParserBase::genDesktopTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::genDesktopTitles1[]  = {
         pstrUsageX,
         pstrUsageY,
         pstrUsageZ,
@@ -81,7 +81,7 @@ const char * const ReportDescParserBase::genDesktopTitles1[] PROGMEM = {
         pstrUsageFeatureNotification,
         pstrUsageResolutionMultiplier
 };
-const char * const ReportDescParserBase::genDesktopTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::genDesktopTitles2[]  = {
         pstrUsageSystemControl,
         pstrUsageSystemPowerDown,
         pstrUsageSystemSleep,
@@ -103,7 +103,7 @@ const char * const ReportDescParserBase::genDesktopTitles2[] PROGMEM = {
         pstrUsageDPadRight,
         pstrUsageDPadLeft
 };
-const char * const ReportDescParserBase::genDesktopTitles3[] PROGMEM = {
+const char * const ReportDescParserBase::genDesktopTitles3[]  = {
         pstrUsageSystemDock,
         pstrUsageSystemUndock,
         pstrUsageSystemSetup,
@@ -114,7 +114,7 @@ const char * const ReportDescParserBase::genDesktopTitles3[] PROGMEM = {
         pstrUsageSystemSpeakerMute,
         pstrUsageSystemHibernate
 };
-const char * const ReportDescParserBase::genDesktopTitles4[] PROGMEM = {
+const char * const ReportDescParserBase::genDesktopTitles4[]  = {
         pstrUsageSystemDisplayInvert,
         pstrUsageSystemDisplayInternal,
         pstrUsageSystemDisplayExternal,
@@ -124,7 +124,7 @@ const char * const ReportDescParserBase::genDesktopTitles4[] PROGMEM = {
         pstrUsageSystemDisplaySwapPriSec,
         pstrUsageSystemDisplayLCDAutoscale
 };
-const char * const ReportDescParserBase::simuTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::simuTitles0[]  = {
         pstrUsageFlightSimulationDevice,
         pstrUsageAutomobileSimulationDevice,
         pstrUsageTankSimulationDevice,
@@ -138,7 +138,7 @@ const char * const ReportDescParserBase::simuTitles0[] PROGMEM = {
         pstrUsageMagicCarpetSimulationDevice,
         pstrUsageBicycleSimulationDevice
 };
-const char * const ReportDescParserBase::simuTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::simuTitles1[]  = {
         pstrUsageFlightControlStick,
         pstrUsageFlightStick,
         pstrUsageCyclicControl,
@@ -146,7 +146,7 @@ const char * const ReportDescParserBase::simuTitles1[] PROGMEM = {
         pstrUsageFlightYoke,
         pstrUsageTrackControl
 };
-const char * const ReportDescParserBase::simuTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::simuTitles2[]  = {
         pstrUsageAileron,
         pstrUsageAileronTrim,
         pstrUsageAntiTorqueControl,
@@ -181,7 +181,7 @@ const char * const ReportDescParserBase::simuTitles2[] PROGMEM = {
         pstrUsageFrontBrake,
         pstrUsageRearBrake
 };
-const char * const ReportDescParserBase::vrTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::vrTitles0[]  = {
         pstrUsageBelt,
         pstrUsageBodySuit,
         pstrUsageFlexor,
@@ -193,17 +193,17 @@ const char * const ReportDescParserBase::vrTitles0[] PROGMEM = {
         pstrUsageVest,
         pstrUsageAnimatronicDevice
 };
-const char * const ReportDescParserBase::vrTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::vrTitles1[]  = {
         pstrUsageStereoEnable,
         pstrUsageDisplayEnable
 };
-const char * const ReportDescParserBase::sportsCtrlTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::sportsCtrlTitles0[]  = {
         pstrUsageBaseballBat,
         pstrUsageGolfClub,
         pstrUsageRowingMachine,
         pstrUsageTreadmill
 };
-const char * const ReportDescParserBase::sportsCtrlTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::sportsCtrlTitles1[]  = {
         pstrUsageOar,
         pstrUsageSlope,
         pstrUsageRate,
@@ -215,7 +215,7 @@ const char * const ReportDescParserBase::sportsCtrlTitles1[] PROGMEM = {
         pstrUsageStickType,
         pstrUsageStickHeight
 };
-const char * const ReportDescParserBase::sportsCtrlTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::sportsCtrlTitles2[]  = {
         pstrUsagePutter,
         pstrUsage1Iron,
         pstrUsage2Iron,
@@ -237,12 +237,12 @@ const char * const ReportDescParserBase::sportsCtrlTitles2[] PROGMEM = {
         pstrUsage7Wood,
         pstrUsage9Wood
 };
-const char * const ReportDescParserBase::gameTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::gameTitles0[]  = {
         pstrUsage3DGameController,
         pstrUsagePinballDevice,
         pstrUsageGunDevice
 };
-const char * const ReportDescParserBase::gameTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::gameTitles1[]  = {
         pstrUsagePointOfView,
         pstrUsageTurnRightLeft,
         pstrUsagePitchForwardBackward,
@@ -269,7 +269,7 @@ const char * const ReportDescParserBase::gameTitles1[] PROGMEM = {
         pstrUsageGamepadFireJump,
         pstrUsageGamepadTrigger
 };
-const char * const ReportDescParserBase::genDevCtrlTitles[] PROGMEM = {
+const char * const ReportDescParserBase::genDevCtrlTitles[]  = {
         pstrUsageBatteryStrength,
         pstrUsageWirelessChannel,
         pstrUsageWirelessID,
@@ -278,7 +278,7 @@ const char * const ReportDescParserBase::genDevCtrlTitles[] PROGMEM = {
         pstrUsageSecurityCodeCharErased,
         pstrUsageSecurityCodeCleared
 };
-const char * const ReportDescParserBase::ledTitles[] PROGMEM = {
+const char * const ReportDescParserBase::ledTitles[]  = {
         pstrUsageNumLock,
         pstrUsageCapsLock,
         pstrUsageScrollLock,
@@ -357,7 +357,7 @@ const char * const ReportDescParserBase::ledTitles[] PROGMEM = {
         pstrUsageSystemSuspend,
         pstrUsageExternalPowerConnected
 };
-const char * const ReportDescParserBase::telTitles0 [] PROGMEM = {
+const char * const ReportDescParserBase::telTitles0 []  = {
         pstrUsagePhone,
         pstrUsageAnsweringMachine,
         pstrUsageMessageControls,
@@ -366,7 +366,7 @@ const char * const ReportDescParserBase::telTitles0 [] PROGMEM = {
         pstrUsageTelephonyKeyPad,
         pstrUsageProgrammableButton
 };
-const char * const ReportDescParserBase::telTitles1 [] PROGMEM = {
+const char * const ReportDescParserBase::telTitles1 []  = {
         pstrUsageHookSwitch,
         pstrUsageFlash,
         pstrUsageFeature,
@@ -386,20 +386,20 @@ const char * const ReportDescParserBase::telTitles1 [] PROGMEM = {
         pstrUsageCallerID,
         pstrUsageSend
 };
-const char * const ReportDescParserBase::telTitles2 [] PROGMEM = {
+const char * const ReportDescParserBase::telTitles2 []  = {
         pstrUsageSpeedDial,
         pstrUsageStoreNumber,
         pstrUsageRecallNumber,
         pstrUsagePhoneDirectory
 };
-const char * const ReportDescParserBase::telTitles3 [] PROGMEM = {
+const char * const ReportDescParserBase::telTitles3 []  = {
         pstrUsageVoiceMail,
         pstrUsageScreenCalls,
         pstrUsageDoNotDisturb,
         pstrUsageMessage,
         pstrUsageAnswerOnOff
 };
-const char * const ReportDescParserBase::telTitles4 [] PROGMEM = {
+const char * const ReportDescParserBase::telTitles4 []  = {
         pstrUsageInsideDialTone,
         pstrUsageOutsideDialTone,
         pstrUsageInsideRingTone,
@@ -416,7 +416,7 @@ const char * const ReportDescParserBase::telTitles4 [] PROGMEM = {
         pstrUsageOutsideRingback,
         pstrUsageRinger
 };
-const char * const ReportDescParserBase::telTitles5 [] PROGMEM = {
+const char * const ReportDescParserBase::telTitles5 []  = {
         pstrUsagePhoneKey0,
         pstrUsagePhoneKey1,
         pstrUsagePhoneKey2,
@@ -434,7 +434,7 @@ const char * const ReportDescParserBase::telTitles5 [] PROGMEM = {
         pstrUsagePhoneKeyC,
         pstrUsagePhoneKeyD
 };
-const char * const ReportDescParserBase::consTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles0[]  = {
         pstrUsageConsumerControl,
         pstrUsageNumericKeyPad,
         pstrUsageProgrammableButton,
@@ -442,12 +442,12 @@ const char * const ReportDescParserBase::consTitles0[] PROGMEM = {
         pstrUsageHeadphone,
         pstrUsageGraphicEqualizer
 };
-const char * const ReportDescParserBase::consTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles1[]  = {
         pstrUsagePlus10,
         pstrUsagePlus100,
         pstrUsageAMPM
 };
-const char * const ReportDescParserBase::consTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles2[]  = {
         pstrUsagePower,
         pstrUsageReset,
         pstrUsageSleep,
@@ -457,7 +457,7 @@ const char * const ReportDescParserBase::consTitles2[] PROGMEM = {
         pstrUsageFunctionButtons
 
 };
-const char * const ReportDescParserBase::consTitles3[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles3[]  = {
         pstrUsageMenu,
         pstrUsageMenuPick,
         pstrUsageMenuUp,
@@ -468,7 +468,7 @@ const char * const ReportDescParserBase::consTitles3[] PROGMEM = {
         pstrUsageMenuValueIncrease,
         pstrUsageMenuValueDecrease
 };
-const char * const ReportDescParserBase::consTitles4[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles4[]  = {
         pstrUsageDataOnScreen,
         pstrUsageClosedCaption,
         pstrUsageClosedCaptionSelect,
@@ -477,7 +477,7 @@ const char * const ReportDescParserBase::consTitles4[] PROGMEM = {
         pstrUsageSnapshot,
         pstrUsageStill
 };
-const char * const ReportDescParserBase::consTitles5[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles5[]  = {
         pstrUsageSelection,
         pstrUsageAssignSelection,
         pstrUsageModeStep,
@@ -516,7 +516,7 @@ const char * const ReportDescParserBase::consTitles5[] PROGMEM = {
         pstrUsageWeekly,
         pstrUsageMonthly
 };
-const char * const ReportDescParserBase::consTitles6[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles6[]  = {
         pstrUsagePlay,
         pstrUsagePause,
         pstrUsageRecord,
@@ -549,7 +549,7 @@ const char * const ReportDescParserBase::consTitles6[] PROGMEM = {
         pstrUsagePlayPause,
         pstrUsagePlaySkip
 };
-const char * const ReportDescParserBase::consTitles7[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles7[]  = {
         pstrUsageVolume,
         pstrUsageBalance,
         pstrUsageMute,
@@ -562,7 +562,7 @@ const char * const ReportDescParserBase::consTitles7[] PROGMEM = {
         pstrUsageVolumeIncrement,
         pstrUsageVolumeDecrement
 };
-const char * const ReportDescParserBase::consTitles8[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles8[]  = {
         pstrUsageSpeedSelect,
         pstrUsagePlaybackSpeed,
         pstrUsageStandardPlay,
@@ -570,7 +570,7 @@ const char * const ReportDescParserBase::consTitles8[] PROGMEM = {
         pstrUsageExtendedPlay,
         pstrUsageSlow
 };
-const char * const ReportDescParserBase::consTitles9[] PROGMEM = {
+const char * const ReportDescParserBase::consTitles9[]  = {
         pstrUsageFanEnable,
         pstrUsageFanSpeed,
         pstrUsageLightEnable,
@@ -586,7 +586,7 @@ const char * const ReportDescParserBase::consTitles9[] PROGMEM = {
         pstrUsageHoldupAlarm,
         pstrUsageMedicalAlarm
 };
-const char * const ReportDescParserBase::consTitlesA[] PROGMEM = {
+const char * const ReportDescParserBase::consTitlesA[]  = {
         pstrUsageBalanceRight,
         pstrUsageBalanceLeft,
         pstrUsageBassIncrement,
@@ -594,7 +594,7 @@ const char * const ReportDescParserBase::consTitlesA[] PROGMEM = {
         pstrUsageTrebleIncrement,
         pstrUsageTrebleDecrement
 };
-const char * const ReportDescParserBase::consTitlesB[] PROGMEM = {
+const char * const ReportDescParserBase::consTitlesB[]  = {
         pstrUsageSpeakerSystem,
         pstrUsageChannelLeft,
         pstrUsageChannelRight,
@@ -607,14 +607,14 @@ const char * const ReportDescParserBase::consTitlesB[] PROGMEM = {
         pstrUsageChannelTop,
         pstrUsageChannelUnknown
 };
-const char * const ReportDescParserBase::consTitlesC[] PROGMEM = {
+const char * const ReportDescParserBase::consTitlesC[]  = {
         pstrUsageSubChannel,
         pstrUsageSubChannelIncrement,
         pstrUsageSubChannelDecrement,
         pstrUsageAlternateAudioIncrement,
         pstrUsageAlternateAudioDecrement
 };
-const char * const ReportDescParserBase::consTitlesD[] PROGMEM = {
+const char * const ReportDescParserBase::consTitlesD[]  = {
         pstrUsageApplicationLaunchButtons,
         pstrUsageALLaunchButtonConfigTool,
         pstrUsageALProgrammableButton,
@@ -688,7 +688,7 @@ const char * const ReportDescParserBase::consTitlesD[] PROGMEM = {
         pstrUsageALResearchSearchBrowser,
         pstrUsageALAudioPlayer
 };
-const char * const ReportDescParserBase::consTitlesE[] PROGMEM = {
+const char * const ReportDescParserBase::consTitlesE[]  = {
         pstrUsageGenericGUIAppControls,
         pstrUsageACNew,
         pstrUsageACOpen,
@@ -831,7 +831,7 @@ const char * const ReportDescParserBase::consTitlesE[] PROGMEM = {
         pstrUsageACDistributeHorizontaly,
         pstrUsageACDistributeVerticaly
 };
-const char * const ReportDescParserBase::digitTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::digitTitles0[]  = {
         pstrUsageDigitizer,
         pstrUsagePen,
         pstrUsageLightPen,
@@ -846,13 +846,13 @@ const char * const ReportDescParserBase::digitTitles0[] PROGMEM = {
         pstrUsageMultiplePointDigitizer,
         pstrUsageFreeSpaceWand
 };
-const char * const ReportDescParserBase::digitTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::digitTitles1[]  = {
         pstrUsageStylus,
         pstrUsagePuck,
         pstrUsageFinger
 
 };
-const char * const ReportDescParserBase::digitTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::digitTitles2[]  = {
         pstrUsageTipPressure,
         pstrUsageBarrelPressure,
         pstrUsageInRange,
@@ -877,11 +877,11 @@ const char * const ReportDescParserBase::digitTitles2[] PROGMEM = {
         pstrUsageEraser,
         pstrUsageTabletPick
 };
-const char * const ReportDescParserBase::aplphanumTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::aplphanumTitles0[]  = {
         pstrUsageAlphanumericDisplay,
         pstrUsageBitmappedDisplay
 };
-const char * const ReportDescParserBase::aplphanumTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::aplphanumTitles1[]  = {
         pstrUsageDisplayAttributesReport,
         pstrUsageASCIICharacterSet,
         pstrUsageDataReadBack,
@@ -929,7 +929,7 @@ const char * const ReportDescParserBase::aplphanumTitles1[] PROGMEM = {
         pstrUsageCharAttributeUnderline,
         pstrUsageCharAttributeBlink
 };
-const char * const ReportDescParserBase::aplphanumTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::aplphanumTitles2[]  = {
         pstrUsageBitmapSizeX,
         pstrUsageBitmapSizeY,
         pstrUsagePageReserved,
@@ -952,7 +952,7 @@ const char * const ReportDescParserBase::aplphanumTitles2[] PROGMEM = {
         pstrUsageSoftButtonOffset2,
         pstrUsageSoftButtonReport
 };
-const char * const ReportDescParserBase::medInstrTitles0[] PROGMEM = {
+const char * const ReportDescParserBase::medInstrTitles0[]  = {
         pstrUsageVCRAcquisition,
         pstrUsageFreezeThaw,
         pstrUsageClipStore,
@@ -962,18 +962,18 @@ const char * const ReportDescParserBase::medInstrTitles0[] PROGMEM = {
         pstrUsagePrint,
         pstrUsageMicrophoneEnable
 };
-const char * const ReportDescParserBase::medInstrTitles1[] PROGMEM = {
+const char * const ReportDescParserBase::medInstrTitles1[]  = {
         pstrUsageCine,
         pstrUsageTransmitPower,
         pstrUsageVolume,
         pstrUsageFocus,
         pstrUsageDepth
 };
-const char * const ReportDescParserBase::medInstrTitles2[] PROGMEM = {
+const char * const ReportDescParserBase::medInstrTitles2[]  = {
         pstrUsageSoftStepPrimary,
         pstrUsageSoftStepSecondary
 };
-const char * const ReportDescParserBase::medInstrTitles3[] PROGMEM = {
+const char * const ReportDescParserBase::medInstrTitles3[]  = {
         pstrUsageZoomSelect,
         pstrUsageZoomAdjust,
         pstrUsageSpectralDopplerModeSelect,
@@ -985,7 +985,7 @@ const char * const ReportDescParserBase::medInstrTitles3[] PROGMEM = {
         pstrUsage2DModeSelect,
         pstrUsage2DModeAdjust
 };
-const char * const ReportDescParserBase::medInstrTitles4[] PROGMEM = {
+const char * const ReportDescParserBase::medInstrTitles4[]  = {
         pstrUsageSoftControlSelect,
         pstrUsageSoftControlAdjust
 };
@@ -1214,7 +1214,7 @@ uint8_t ReportDescParserBase::ParseItem(uint8_t **pp, uint16_t *pcntdn) {
         return enErrorSuccess;
 }
 
-ReportDescParserBase::UsagePageFunc ReportDescParserBase::usagePageFunctions[] /*PROGMEM*/ = {
+ReportDescParserBase::UsagePageFunc ReportDescParserBase::usagePageFunctions[] /**/ = {
         &ReportDescParserBase::PrintGenericDesktopPageUsage,
         &ReportDescParserBase::PrintSimulationControlsPageUsage,
         &ReportDescParserBase::PrintVRControlsPageUsage,

@@ -5,55 +5,55 @@
 #include <mtpconst.h>
 #include <ptpcallback.h>
 
-const char msgUndefined		[] PROGMEM = "Undefined";
+const char msgUndefined		[]  = "Undefined";
 
 // Ancillary formats
-const char msgAssociation	[] PROGMEM = "Association";
-const char msgScript		[] PROGMEM = "Script";
-const char msgExecutable	[] PROGMEM = "Executable";
-const char msgText			[] PROGMEM = "Text";
-const char msgHTML			[] PROGMEM = "HTML";
-const char msgDPOF			[] PROGMEM = "DPOF";
-const char msgAIFF	 		[] PROGMEM = "AIFF";
-const char msgWAV			[] PROGMEM = "WAV";
-const char msgMP3			[] PROGMEM = "MP3";
-const char msgAVI			[] PROGMEM = "AVI";
-const char msgMPEG			[] PROGMEM = "MPEG";
-const char msgASF			[] PROGMEM = "ASF";
-const char msgQT			[] PROGMEM = "QT";
+const char msgAssociation	[]  = "Association";
+const char msgScript		[]  = "Script";
+const char msgExecutable	[]  = "Executable";
+const char msgText			[]  = "Text";
+const char msgHTML			[]  = "HTML";
+const char msgDPOF			[]  = "DPOF";
+const char msgAIFF	 		[]  = "AIFF";
+const char msgWAV			[]  = "WAV";
+const char msgMP3			[]  = "MP3";
+const char msgAVI			[]  = "AVI";
+const char msgMPEG			[]  = "MPEG";
+const char msgASF			[]  = "ASF";
+const char msgQT			[]  = "QT";
 
 // Image formats
-const char msgEXIF_JPEG			[] PROGMEM = "EXIF_JPEG";
-const char msgTIFF_EP			[] PROGMEM = "TIFF_EP";
-const char msgFlashPix			[] PROGMEM = "FlashPix";
-const char msgBMP				[] PROGMEM = "BMP";
-const char msgCIFF				[] PROGMEM = "CIFF";
-const char msgUndefined_0x3806	[] PROGMEM = "Undefined_0x3806";
-const char msgGIF				[] PROGMEM = "GIF";
-const char msgJFIF				[] PROGMEM = "JFIF";
-const char msgPCD				[] PROGMEM = "PCD";
-const char msgPICT				[] PROGMEM = "PICT";
-const char msgPNG				[] PROGMEM = "PNG";
-const char msgUndefined_0x380C	[] PROGMEM = "Undefined_0x380C";
-const char msgTIFF				[] PROGMEM = "TIFF";
-const char msgTIFF_IT			[] PROGMEM = "TIFF_IT";
-const char msgJP2				[] PROGMEM = "JP2";
-const char msgJPX				[] PROGMEM = "JPX";
+const char msgEXIF_JPEG			[]  = "EXIF_JPEG";
+const char msgTIFF_EP			[]  = "TIFF_EP";
+const char msgFlashPix			[]  = "FlashPix";
+const char msgBMP				[]  = "BMP";
+const char msgCIFF				[]  = "CIFF";
+const char msgUndefined_0x3806	[]  = "Undefined_0x3806";
+const char msgGIF				[]  = "GIF";
+const char msgJFIF				[]  = "JFIF";
+const char msgPCD				[]  = "PCD";
+const char msgPICT				[]  = "PICT";
+const char msgPNG				[]  = "PNG";
+const char msgUndefined_0x380C	[]  = "Undefined_0x380C";
+const char msgTIFF				[]  = "TIFF";
+const char msgTIFF_IT			[]  = "TIFF_IT";
+const char msgJP2				[]  = "JP2";
+const char msgJPX				[]  = "JPX";
 
 // MTP Object Formats
-const char msgUndefined_Firmware				[] PROGMEM = "Undefined_Firmware";
-const char msgWindows_Image_Format				[] PROGMEM = "Windows_Image_Format";
-const char msgUndefined_Audio					[] PROGMEM = "Undefined_Audio";
-const char msgWMA								[] PROGMEM = "WMA";
-const char msgOGG								[] PROGMEM = "OGG";
-const char msgAAC								[] PROGMEM = "AAC";
-const char msgAudible							[] PROGMEM = "Audible";
-const char msgFLAC								[] PROGMEM = "FLAC";
-const char msgUndefined_Video					[] PROGMEM = "Undefined_Video";
-const char msgWMV								[] PROGMEM = "WMV";
-const char msgMP4_Container						[] PROGMEM = "MP4_Container";
-const char msgMP2								[] PROGMEM = "MP2";
-const char msg3GP_Container						[] PROGMEM = "3GP_Container";
+const char msgUndefined_Firmware				[]  = "Undefined_Firmware";
+const char msgWindows_Image_Format				[]  = "Windows_Image_Format";
+const char msgUndefined_Audio					[]  = "Undefined_Audio";
+const char msgWMA								[]  = "WMA";
+const char msgOGG								[]  = "OGG";
+const char msgAAC								[]  = "AAC";
+const char msgAudible							[]  = "Audible";
+const char msgFLAC								[]  = "FLAC";
+const char msgUndefined_Video					[]  = "Undefined_Video";
+const char msgWMV								[]  = "WMV";
+const char msgMP4_Container						[]  = "MP4_Container";
+const char msgMP2								[]  = "MP2";
+const char msg3GP_Container						[]  = "3GP_Container";
 
 
 /**
