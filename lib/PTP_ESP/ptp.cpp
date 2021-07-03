@@ -370,6 +370,8 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
         if (rcode) {
             //Serial.print("Transaction: Command block send error: ");
             //Serial.println(rcode);
+            Serial.println("RestartGeneralError1");
+            //ESP.restart();
             return PTP_RC_GeneralError;
         }
     }
@@ -383,6 +385,8 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
         if (flags->txOperation) {
             if (flags->typeOfVoid && !pVoid) {
                 //Serial.print("Transaction: pVoid is NULL\n");
+                Serial.println("RestartGeneralError2");
+                ESP.restart();
                 return PTP_RC_GeneralError;
             }
 
@@ -429,6 +433,8 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
                     //PTPTRACE2("Transaction: Data block send error.", rcode);
                     Serial.print("Transaction: Data block send error.: ");
                     Serial.println(rcode);
+                    Serial.println("RestartGeneralError");
+                    ESP.restart();
                     return PTP_RC_GeneralError;
                 }
 
@@ -474,6 +480,8 @@ uint16_t PTP::Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params = 
                 //PTPTRACE2("Transaction: Response receive error 1", rcode);
                 Serial.print("Transaction: Response receive error 1: ");
                 Serial.println(rcode);
+                /*Serial.println("RestartGeneralError");
+                ESP.restart();*/
                 return PTP_RC_GeneralError;
             }
 
@@ -670,7 +678,7 @@ uint16_t PTP::TransactionPerso(uint16_t opcode, OperFlags *flags, HexPersoDumper
 
                 // in some cases NAK handling might be necessary
                 //PTPTRACE2("Transaction: Response receive error 1", rcode);
-                Serial.print("Transaction: Response receive error 1: ");
+                Serial.print("Transaction: Response receive error 1P: ");
                 Serial.println(rcode);
                 return PTP_RC_GeneralError;
             }

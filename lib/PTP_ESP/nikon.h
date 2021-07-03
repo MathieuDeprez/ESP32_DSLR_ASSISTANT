@@ -197,6 +197,7 @@ class NikonDSLR : public PTP {
     uint16_t GetLiveViewImage(PTPReadParser *parser);
     uint16_t GetLiveViewImage(HexPersoDumper *myDumpPerso);
     uint16_t MoveFocus(uint8_t direction, uint16_t step);
+    void waitCameraReady(unsigned long timeout);
 };
 
 #endif  // __NIKON_H__

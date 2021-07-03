@@ -6,6 +6,8 @@
 #include <nikon.h>
 //#include <psvaluetitles.h>
 //#include <main.h>
+#include <SPI.h>
+#include <SSD_13XX.h>
 #include <ptp.h>
 #include <ptpdebug.h>
 #include <ptpdpparser.h>
@@ -13,6 +15,9 @@
 #include <usbhub.h>
 
 #include "BluetoothSerial.h"
+
+#define CS_OLED 17
+#define DC_OLED 16
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -32,7 +37,7 @@ class Nikon : public NikonDSLR {
     virtual uint8_t Poll();
 };
 
-extern valueNameStructUint16 LIST_ATPERTURE[17];
+extern valueNameStructUint16 LIST_ATPERTURE[19];
 extern valueNameStructUint8 LIST_COMPRESSION[5];
 extern valueNameStructUint8_19 LIST_IMAGE_FORMAT[3];
 extern valueNameStructUint16 LIST_WHITE_BALANCE[8];
@@ -45,6 +50,14 @@ extern valueNameStructUint16 LIST_STILL_CAPTURE_MODE[6];
 extern valueNameStructUint8 LIST_COLOR_SPACE[2];
 extern valueNameStructUint16 LIST_EXP_BIAS_COMP[31];
 extern valueNameStructUint16 LIST_EVENT[42];
+
+extern uint8_t HdrNbrPhotoArray[10];
+extern float HdrExpPasArray[9];
+//extern float HdrExpOffsetArray[19];
+
+extern QueueHandle_t queueOledCmd;
+extern QueueHandle_t queueCamMod;
+extern QueueHandle_t queueCmdDslr;
 
 bool getLiveView(Nikon &nikon, BluetoothSerial &SerialBT);
 void startLiveView(Nikon &nikon, BluetoothSerial &SerialBT);
@@ -60,5 +73,42 @@ int getAperture(Nikon &nikon, BluetoothSerial &SerialBT);
 
 bool setIso(Nikon &nikon, BluetoothSerial &SerialBT);
 int getIso(Nikon &nikon, BluetoothSerial &SerialBT);
+
+bool setExpoBias(Nikon &nikon, BluetoothSerial &SerialBT);
+int getExpoBias(Nikon &nikon, BluetoothSerial &SerialBT);
+
+int getExpositionMode(Nikon &nikon, BluetoothSerial &SerialBT);
+
+void tryFocus(Nikon &nikon, BluetoothSerial &SerialBT, uint32_t *posFocus);
+void takeHdr(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *hdrParams);
+
+int getFocusMod(Nikon &nikon, BluetoothSerial &SerialBT);
+bool takePhotoAndroid(Nikon &nikon, BluetoothSerial &SerialBT);
+
+bool moveFocusAndroid(Nikon &nikon, BluetoothSerial &SerialBT);
+
+bool takeTimeLapse(Nikon &nikon, BluetoothSerial &SerialBT);
+
+void oledCode(void *pvParameters);
+void batterieLevelCode(void *pvParameters);
+
+void fillBatteryIcon(int value);
+void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param);
+
+void IRAM_ATTR isr_1();
+void IRAM_ATTR isr_2();
+void IRAM_ATTR isr_3();
+void IRAM_ATTR isr_4();
+void IRAM_ATTR isr_5();
+
+struct COMMANDE_DSLR {
+    uint8_t para1;
+    uint8_t para2;
+    uint8_t para3;
+    uint8_t para4;
+    uint8_t para5;
+};
+
+void modCamCode(void *pvParameters);
 
 #endif

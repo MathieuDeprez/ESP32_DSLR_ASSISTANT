@@ -193,7 +193,4 @@ e-mail   :  support@circuitsathome.com
 #define pgm_read_float_far(addr) pgm_read_float(addr)
 #endif
 
-#ifndef pgm_read_pointer
-#define pgm_read_pointer
-#endif
 #endif

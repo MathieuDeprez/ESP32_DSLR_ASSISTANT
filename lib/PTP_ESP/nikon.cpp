@@ -136,3 +136,20 @@ uint16_t NikonDSLR::MoveFocus(uint8_t direction, uint16_t step) {
 
     return Transaction(PTP_OC_NIKON_MfDrive, &flags, params, NULL);
 }
+
+void NikonDSLR::waitCameraReady(unsigned long timeout) {
+    unsigned long timer = millis();
+    uint16_t ret = PTP_RC_DeviceBusy;
+    ret = Operation(NK_OC_DeviceReady, 0, NULL);
+
+    while (ret == PTP_RC_DeviceBusy) {
+        if(millis()-timer>timeout){
+            Serial.println("Timeout wait Camera ready");
+            return;
+        }
+        delay(200);
+        ret = Operation(NK_OC_DeviceReady, 0, NULL);
+        Serial.print("Ready : ");
+        Serial.println(ret, HEX);
+    }
+}

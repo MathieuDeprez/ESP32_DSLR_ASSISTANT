@@ -25,6 +25,7 @@ e-mail   :  support@circuitsathome.com
 #ifndef HEX_PERSO_DUMPER_H
 #define HEX_PERSO_DUMPER_H
 #include <Arduino.h>
+
 #include "BluetoothSerial.h"
 extern int UsbDEBUGlvl;
 
@@ -45,7 +46,9 @@ class HexPersoDumper {
 
    private:
     static uint8_t actualPercent;
+    static bool constructing;
     static BluetoothSerial SerialBT;
+    static uint8_t *bufRaw;
 };
 
 #endif  // HEX_PERSO_DUMPER_H
