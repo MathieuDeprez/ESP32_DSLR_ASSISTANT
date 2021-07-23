@@ -2,8 +2,6 @@
 #include <main.h>
 bool LiveViewStatus = false;
 
-void timeLapseTask(void *pvParameters);
-
 bool getLiveView(Nikon &nikon, BluetoothSerial &SerialBT) {
     uint8_t buf;
     nikon.GetDevicePropValue(0xD1A2, (uint8_t &)buf);
@@ -21,6 +19,7 @@ void startLiveView(Nikon &nikon, BluetoothSerial &SerialBT) {
         }
     }
 }
+
 void stopLiveView(Nikon &nikon, BluetoothSerial &SerialBT) {
     if (getLiveView(nikon, SerialBT)) {
         if (nikon.Operation(PTP_OC_NIKON_EndLiveView, 0, NULL) == PTP_RC_OK) {
@@ -263,34 +262,6 @@ bool takeTimeLapse(Nikon &nikon, BluetoothSerial &SerialBT) {
         NULL, 1);         
 }*/
 
-/*void timeLapseTask(void *pvParameters) {
-    Serial.println("CreateTimeLapse Task");
-    unsigned long timerTL = millis();
-    int numberphoto = 0;
-    Nikon nikon = *((Nikon *)pvParameters);
-    while (true) {
-        numberphoto++;
-        Serial.print("TimeLapse Photo:");
-        Serial.println(numberphoto);
-
-        //prendre une photo
-        nikon.waitCameraReady(3000);
-
-        uint16_t ret = nikon.InitiateCapture();
-        nikon.waitCameraReady(10000);
-        Serial.print("capture: ");
-        Serial.println(ret);
-        nikon.waitCameraReady(3000);
-        timerTL = millis();
-        while (millis() - timerTL < TIMER_TIMELAPSE) {
-            if (!TIMER_ENABLE) {
-                Serial.print("Finish timeLapseTask");
-                vTaskDelete(NULL);
-            }
-        }
-    }
-}*/
-
 bool takePhotoAndroid(Nikon &nikon, BluetoothSerial &SerialBT) {
     char focusReveived[10] = {};
     uint8_t sizeReceived = 0;
@@ -504,6 +475,111 @@ int getFocusMod(Nikon &nikon, BluetoothSerial &SerialBT) {
     return buf;
 }
 
+void takeLongExposure(Nikon &nikon, BluetoothSerial &SerialBT, int delayLongExpo) {
+    //Get actual focus mod
+    int initialFocusMod = getFocusMod(nikon, SerialBT);
+    Serial.print("initial focusMod: ");
+    Serial.println(initialFocusMod);
+
+    //Set autoFocus manual
+    uint16_t rep = nikon.SetDevicePropValue(NK_DPC_AutofocusMode, (uint8_t)0x04);
+    if (rep != PTP_RC_OK) {
+        Serial.print("set autoFocus to manual fail, rc: ");
+        Serial.println(rep);
+    } else {
+        Serial.println("autoFocus to manual");
+    }
+    nikon.waitCameraReady(3000);
+
+    //Get LV status
+    bool initialLvStatus = getLiveView(nikon, SerialBT);
+    Serial.print("initialLvStatus: ");
+    Serial.println(initialLvStatus);
+    //Stop LV
+    if (!initialLvStatus) {
+        stopLiveView(nikon, SerialBT);
+        delay(200);
+        while (getLiveView(nikon, SerialBT)) {
+            Serial.println("waiting for lv turning on...");
+            delay(200);
+        }
+    }
+
+    uint16_t repBulb = nikon.SetDevicePropValue(PTP_DPC_ExposureTime, LIST_EXPOSURE_TIME[53].value);
+    if (repBulb != PTP_RC_OK) {
+        Serial.print("error, rc: ");
+        Serial.println(repBulb);
+
+    } else {
+        Serial.println("set expo time to bulb succes!!");
+    }
+    nikon.waitCameraReady(3000);
+    delay(500);
+    //Boucle pour prendre des photos
+
+    uint32_t paraCapture[2] = {0xFFFFFFFF, 0x00000000};
+    uint16_t retCaptur = nikon.Operation(0x9207, 2, paraCapture);
+    Serial.print("CAptureInit: ");
+    Serial.println(retCaptur, HEX);
+    delay(200);
+
+    do {
+        retCaptur = nikon.Operation(NK_OC_DeviceReady, 0, NULL);
+        Serial.print("Ready2 : ");
+        Serial.println(retCaptur, HEX);
+        delay(200);
+    } while (retCaptur == PTP_RC_DeviceBusy);
+
+    delay(delayLongExpo * 1000);
+
+    uint32_t paraCaptureStop[2] = {0xFFFFFFFF, 0x00000000};
+    uint16_t retCapturEnd = nikon.Operation(0x920C, 2, paraCaptureStop);
+    Serial.print("Capture end: ");
+    Serial.println(retCapturEnd, HEX);
+    delay(200);
+
+    do {
+        retCapturEnd = nikon.Operation(NK_OC_DeviceReady, 0, NULL);
+        Serial.print("Ready2 : ");
+        Serial.println(retCapturEnd, HEX);
+        delay(200);
+    } while (retCapturEnd == PTP_RC_DeviceBusy);
+    nikon.waitCameraReady(3000);
+    /*uint16_t repinit = nikon.InitiateCapture();
+    if (repinit != PTP_RC_OK) {
+        Serial.printf("repinit image error: %d\n", repinit);
+    }
+    nikon.waitCameraReady(3000);
+    delay(500);
+    uint16_t repCapOpen = nikon.InitiateOpenCapture();
+    if (repCapOpen != PTP_RC_OK) {
+        Serial.printf("repCapOpen image error: %d\n", repCapOpen);
+    }
+    nikon.waitCameraReady(3000);
+    delay(500);
+    //nikon.Capture();
+    uint16_t repCap = nikon.CaptureImage();
+    if (repCap != PTP_RC_OK) {
+        Serial.printf("capture image error: %d\n", repCap);
+    }
+    nikon.waitCameraReady(3000);
+    delay(5000);
+    nikon.TerminateOpenCapture(0);
+    nikon.waitCameraReady(3000);*/
+    //Turn on auto-focus
+    if (initialFocusMod != 0x04) {
+        uint16_t rep = nikon.SetDevicePropValue(NK_DPC_AutofocusMode, (uint8_t)initialFocusMod);
+        if (rep != PTP_RC_OK) {
+            Serial.print("set autoFocus to initial fail, rc: ");
+            Serial.println(rep);
+        } else {
+            Serial.println("autoFocus to initial");
+        }
+    }
+
+    Serial.println("Long exposure done !!!");
+}
+
 void takeHdr(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *hdrParams) {
     Serial.println("takeHdr function");
     uint8_t hdrNumber = hdrParams[0];       //3
@@ -519,17 +595,17 @@ void takeHdr(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *hdrParams) {
     Serial.println(initialFocusMod);
 
     //Convert Pas to number of index
-    int pasIndex = ((hdrPasDix + 1) / 10 * 3); //(10+1)/10*3 = 11/10*3 = 1.1*3 = 3    ///////  (11+1)/10*3 = 1.2*3 = 3.6 = 3
+    int pasIndex = ((hdrPasDix + 1) / 10 * 3);  //(10+1)/10*3 = 11/10*3 = 1.1*3 = 3    ///////  (11+1)/10*3 = 1.2*3 = 3.6 = 3
     Serial.print("pasIndex: ");
     Serial.println(pasIndex);
 
     //Make a list with expo Bias to do
-    int startIndex = -hdrNumber / 2; //-3/2 = -1
+    int startIndex = -hdrNumber / 2;  //-3/2 = -1
     Serial.print("startIndex: ");
     Serial.println(startIndex);
 
     uint8_t expoBiasIndexList[31] = {0};
-    for (int i = 0; i < hdrNumber; i++) { //i<3
+    for (int i = 0; i < hdrNumber; i++) {                          //i<3
         int index = (startIndex + i) * pasIndex + hdrOffsetIndex;  //(-1+0)*3+15 = -3+15 = 12
         Serial.print("index: ");
         Serial.println(index);

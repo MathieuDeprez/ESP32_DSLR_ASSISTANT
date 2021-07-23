@@ -11,7 +11,6 @@ void IRAM_ATTR isr_1() {
     const int indexMod = 0;
     if (millis() - timerInput01 > 200 && millis() != timerInput01 && !digitalRead(14)) {
         timerInput01 = millis();
-        //indexMod = ((indexMod + 1) % 3) + 1;
         if (queueCamMod != nullptr)
             xQueueSend(queueCamMod, &indexMod, 0);
     }

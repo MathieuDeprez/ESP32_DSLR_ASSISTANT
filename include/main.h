@@ -94,6 +94,8 @@ void batterieLevelCode(void *pvParameters);
 
 void fillBatteryIcon(int value);
 void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param);
+void printEvent(uint16_t *bufEvent, Nikon &nikon, BluetoothSerial &SerialBT);
+void takeLongExposure(Nikon &nikon, BluetoothSerial &SerialBT, int delayLongExpo);
 
 void IRAM_ATTR isr_1();
 void IRAM_ATTR isr_2();

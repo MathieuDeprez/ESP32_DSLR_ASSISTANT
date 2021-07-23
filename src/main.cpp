@@ -26,6 +26,7 @@ class CamStateHandlers : public PTPStateHandlers {
 const uint8_t logoBB[] = {0x38, 0x6c, 0xe6, 0xea, 0xa6, 0xce, 0xce, 0xa6, 0xea, 0xe6, 0x6c, 0x38};
 const uint8_t logoCam[] = {0x07, 0x00, 0x0f, 0x80, 0x78, 0xf0, 0xc0, 0x18, 0x87, 0x68, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,
                            0x87, 0x08, 0x80, 0x08, 0xff, 0xf8};
+char timeLapseParameterFixe[][21] = {"Initial/final length", "Mult. factor", "Raw delay"};
 
 //#include <simplefifo.h>
 
@@ -212,6 +213,16 @@ uint8_t Nikon::Poll() {
                 } else {
                     Serial.println("hdr, not enough parameters");
                 }
+            } else if (received == 'L') {
+                uint8_t delay_01 = SerialBT.read();
+                uint8_t delay_02 = SerialBT.read();
+                if (SerialBT.read() == ';') {
+                    int delayLongExpo = delay_01 << 8 | delay_02;
+                    Serial.printf("\ndelayLongExpo: %d\n", delayLongExpo);
+                    takeLongExposure(*this, SerialBT, delayLongExpo);
+                } else {
+                    Serial.println("\nerror receiving long expo");
+                }
             }
 
             if (received == 'A') {  // Start Live View
@@ -278,35 +289,7 @@ uint8_t Nikon::Poll() {
         uint16_t bufEvent[6] = {};
         EventCheck(bufEvent);
 
-        int sizeList = sizeof(LIST_EVENT) / sizeof(LIST_EVENT[0]);
-
-        for (int i = 0; i < 6; i++) {
-            if (bufEvent[i] != 0x000) {
-                Serial.printf("%04x -> ", bufEvent[i]);
-                bool nameFound = false;
-                for (int j = 0; j < sizeList; j++) {
-                    if (LIST_EVENT[j].value == bufEvent[i]) {
-                        Serial.println(LIST_EVENT[j].name);
-                        nameFound = true;
-
-                        if (strcmp("ExpTime", LIST_EVENT[j].name) == 0) {
-                            getShutterSpeed(*this, SerialBT);
-                        } else if (strcmp("ExpPrgMod", LIST_EVENT[j].name) == 0) {
-                            getExpositionMode(*this, SerialBT);
-                        } else if (strcmp("Fnumber", LIST_EVENT[j].name) == 0) {
-                            getAperture(*this, SerialBT);
-                        } else if (strcmp("IsoCtlSen", LIST_EVENT[j].name) == 0) {
-                            getIso(*this, SerialBT);
-                        }
-
-                        break;
-                    }
-                }
-                if (!nameFound) {
-                    Serial.println("Event Undefinned");
-                }
-            }
-        }
+        printEvent(bufEvent, *this, SerialBT);
 
         COMMANDE_DSLR commande;
         if (xQueueReceive(queueCmdDslr, &commande, 0)) {
@@ -321,7 +304,31 @@ uint8_t Nikon::Poll() {
                 Serial.println(hdrParams[2]);
 
                 takeHdr(*this, SerialBT, hdrParams);
-            }
+            } else if (commande.para1 == 1) {  //Stop timelapse
+                TIMER_TIMELAPSE = 1000;
+                NUMBER_TL = 0;
+                TL_ENABLE = false;
+            } else if (commande.para1 == 2) {
+                TIMER_TIMELAPSE = ((uint8_t)commande.para2 << 8) | (uint8_t)commande.para3;
+
+                //Serial.printf("para2: %d\n", commande.para2);
+                //Serial.printf("para3: %d\n", commande.para3);
+                Serial.printf("TIMER_TIMELAPSE: %d\n", TIMER_TIMELAPSE);
+                NUMBER_TL = 0;
+                TL_ENABLE = true;
+            } /*else if (commande.para1 == 99) {
+                Serial.println("Debug cmd received!");
+
+                takePhotoDebug(*this, SerialBT);
+                SerialBT.flush();
+
+                for (int i = 0; i < 5; i++) {
+                    Serial.printf("EVENT CHECK AFTER TAKE PHOTO %d\n", i);
+                    uint16_t bufEvent[6] = {};
+                    EventCheck(bufEvent);
+                    printEvent(bufEvent, *this, SerialBT);
+                }
+            }*/
         }
 
         /*if (numberTouchPressed > 0 && millis() - timerTouchPin > 500) {
@@ -342,6 +349,38 @@ uint8_t Nikon::Poll() {
 
     return 0;
 };
+
+void printEvent(uint16_t *bufEvent, Nikon &nikon, BluetoothSerial &SerialBT) {
+    int sizeList = sizeof(LIST_EVENT) / sizeof(LIST_EVENT[0]);
+
+    for (int i = 0; i < 6; i++) {
+        if (bufEvent[i] != 0x000) {
+            Serial.printf("%04x -> ", bufEvent[i]);
+            bool nameFound = false;
+            for (int j = 0; j < sizeList; j++) {
+                if (LIST_EVENT[j].value == bufEvent[i]) {
+                    Serial.println(LIST_EVENT[j].name);
+                    nameFound = true;
+
+                    if (strcmp("ExpTime", LIST_EVENT[j].name) == 0) {
+                        getShutterSpeed(nikon, SerialBT);
+                    } else if (strcmp("ExpPrgMod", LIST_EVENT[j].name) == 0) {
+                        getExpositionMode(nikon, SerialBT);
+                    } else if (strcmp("Fnumber", LIST_EVENT[j].name) == 0) {
+                        getAperture(nikon, SerialBT);
+                    } else if (strcmp("IsoCtlSen", LIST_EVENT[j].name) == 0) {
+                        getIso(nikon, SerialBT);
+                    }
+
+                    break;
+                }
+            }
+            if (!nameFound) {
+                Serial.println("Event Undefinned");
+            }
+        }
+    }
+}
 
 CamStateHandlers CamStates;
 USB Usb;
@@ -393,6 +432,21 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Start");
 
+    std::string myStdString = "monStdString";
+    Serial.println(myStdString.c_str());
+
+    //delay(500);
+    Serial.println("START 500ms");
+
+    Serial.printf("\033[3;31m Some error\n\033[0m;");
+    Serial.println("abc");
+    Serial.printf("\033[1;31m Some error\n");
+    Serial.println("abc");
+    Serial.printf("\033[2;32m Some error\n\033[0m;");
+    Serial.println("abc");
+    Serial.printf("\033[1;31m Some error\n\033[0m;");
+    Serial.println("abc");
+
     SerialBT.register_callback(callback);
     SerialBT.begin("ESP32test");  //Bluetooth device name
     imageDump.SetBl(&SerialBT);
@@ -403,7 +457,11 @@ void setup() {
     delay(200);
     SerialBT.flush();
 
+    //delay(500);
+    Serial.println("START 1s");
+
     tft.begin();
+    tft.setRotation(2);
 
     uint8_t errorCode = 0;
     errorCode = tft.getErrorCode();
@@ -527,11 +585,11 @@ void oledCode(void *pvParameters) {
                 tft.setTextColor(YELLOW);
                 tft.print(modArray[indexMod]);*/
             } else if (element == 5) {  // update batterie Value
-                tft.fillRect(0, 55, 32, 7, BLACK);
-                tft.setCursor(0, 55);
+                //tft.fillRect(0, 55, 32, 7, BLACK);
+                //tft.setCursor(0, 55);
                 int batteryValue = analogRead(34);
-                tft.setTextColor(RED);
-                tft.print(batteryValue);
+                //tft.setTextColor(RED);
+                //tft.print(batteryValue);
                 fillBatteryIcon(batteryValue);
             } else if (element == 6) {  // Camera connectée
                 tft.drawBitmap(75, 1, logoCam, 13, 11, BLUE);
@@ -550,6 +608,7 @@ void oledCode(void *pvParameters) {
 
                 //tft.fillRect(0, 12, 96, 52, BLUE);
                 //tft.fillRect(32, 12, 32, 52, GREEN);
+                tft.fillRect(0, 12, 96, 52, BLACK);
 
                 tft.setTextScale(1);
                 tft.setTextColor(WHITE);
@@ -587,6 +646,30 @@ void oledCode(void *pvParameters) {
                 tft.setTextColor(YELLOW);
                 tft.print(modArray[2]);
                 tft.fillRect(0, 12, 96, 52, BLACK);
+
+                tft.setTextScale(1);
+                tft.setTextColor(ORANGE);
+
+                tft.setCursor(5, 16);
+                tft.printf("%s", timeLapseParameterFixe[0]);
+
+                tft.setTextColor(WHITE);
+
+                tft.setCursor(5, 35);
+                tft.printf("length: %d s", 60);
+                tft.setCursor(58, 35);
+                tft.printf("->");
+                tft.setCursor(71, 35);
+                tft.printf("%d s", 10);
+
+                tft.setCursor(5, 50);
+                tft.printf("Fps: %d", 24);
+
+                tft.fillRect(2, 18, 2, 2, WHITE);
+                tft.fillRect(35, 43, 17, 2, BLACK);
+                tft.fillRect(75, 43, 17, 2, BLACK);
+                tft.fillRect(2, 52, 2, 2, BLACK);
+
                 //modCam = 2;
             } else if (element == 13) {  // Change para HDR - Nbr Photo
 
@@ -637,6 +720,171 @@ void oledCode(void *pvParameters) {
                 tft.setCursor(5, 46);
                 tft.printf("Exp. offset: %s", LIST_EXP_BIAS_COMP[indexExpOffset].name);
 
+            } else if (element == 19) {  // Change para TIMELAPSE - PARA FIX
+
+                tft.fillRect(2, 18, 2, 2, WHITE);
+                tft.fillRect(35, 43, 17, 2, BLACK);
+                tft.fillRect(75, 43, 17, 2, BLACK);
+                tft.fillRect(2, 52, 2, 2, BLACK);
+
+            } else if (element == 20) {  // Change para TIMELAPSE - initial length
+
+                tft.fillRect(2, 18, 2, 2, BLACK);
+                tft.fillRect(35, 43, 17, 2, WHITE);
+                tft.fillRect(75, 43, 17, 2, BLACK);
+                tft.fillRect(2, 52, 2, 2, BLACK);
+
+            } else if (element == 21) {  // Change para TIMELAPSE - final length
+
+                tft.fillRect(2, 18, 2, 2, BLACK);
+                tft.fillRect(35, 43, 17, 2, BLACK);
+                tft.fillRect(75, 43, 17, 2, WHITE);
+                tft.fillRect(2, 52, 2, 2, BLACK);
+
+            } else if (element == 22) {  // Change para TIMELAPSE - fps
+
+                tft.fillRect(2, 18, 2, 2, BLACK);
+                tft.fillRect(35, 43, 17, 2, BLACK);
+                tft.fillRect(75, 43, 17, 2, BLACK);
+                tft.fillRect(2, 52, 2, 2, WHITE);
+
+            } else if (element == 23) {  // Change value timelapse para fix
+
+                int indexParaFix = 0;
+                xQueueReceive(queueOledCmd, &indexParaFix, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(0, 12, 96, 52, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(ORANGE);
+
+                tft.setCursor(5, 16);
+                tft.printf("%s", timeLapseParameterFixe[indexParaFix]);
+
+                tft.setTextColor(WHITE);
+
+                switch (indexParaFix) {
+                    case 0: {
+                        tft.setCursor(5, 35);
+                        tft.printf("length: %d s", 60);
+                        tft.setCursor(60, 35);
+                        tft.printf("->");
+                        tft.setCursor(75, 35);
+                        tft.printf("%d s", 10);
+
+                        tft.setCursor(5, 50);
+                        tft.printf("Fps: %d", 24);
+
+                        tft.fillRect(2, 18, 2, 2, WHITE);
+                        tft.fillRect(35, 43, 17, 2, BLACK);
+                        tft.fillRect(75, 43, 17, 2, BLACK);
+                        tft.fillRect(2, 52, 2, 2, BLACK);
+                        break;
+                    }
+                    case 1: {
+                        tft.setCursor(5, 35);
+                        tft.printf("Multi factor: %d", 10);
+
+                        tft.setCursor(5, 50);
+                        tft.printf("Fps: %d", 24);
+
+                        tft.fillRect(2, 18, 2, 2, WHITE);
+                        tft.fillRect(2, 37, 2, 2, BLACK);
+                        tft.fillRect(2, 52, 2, 2, BLACK);
+                        break;
+                    }
+                    case 2: {
+                        tft.setCursor(5, 40);
+                        tft.printf("Raw delay:\n    %d ms", 2000);
+
+                        tft.fillRect(2, 18, 2, 2, WHITE);
+                        tft.fillRect(2, 42, 2, 2, BLACK);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+
+            } else if (element == 24) {  // Change value timelapse init len
+                int initLenValue = 0;
+                xQueueReceive(queueOledCmd, &initLenValue, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(5, 35, 55, 8, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(WHITE);
+
+                tft.setCursor(5, 35);
+                tft.printf("length: %d s", initLenValue);
+
+            } else if (element == 25) {  // Change value timelapse final len
+                int finalLenValue = 0;
+                xQueueReceive(queueOledCmd, &finalLenValue, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(71, 35, 24, 8, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(WHITE);
+                tft.setCursor(71, 35);
+                tft.printf("%d s", finalLenValue);
+
+            } else if (element == 26) {  // Change value timelapse fps
+                int fpsValue = 0;
+                xQueueReceive(queueOledCmd, &fpsValue, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(5, 50, 50, 8, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(WHITE);
+                tft.setCursor(5, 50);
+                tft.printf("Fps: %d", fpsValue);
+
+            } else if (element == 27) {  // Stop Timelapse
+                tft.fillRect(91, 60, 4, 4, RED);
+            } else if (element == 28) {  // Stop Timelapse
+                tft.fillRect(91, 60, 4, 4, GREEN);
+            } else if (element == 29) {  // Timelapse para mult fac
+                tft.fillRect(2, 18, 2, 2, BLACK);
+                tft.fillRect(2, 37, 2, 2, WHITE);
+                tft.fillRect(2, 52, 2, 2, BLACK);
+            } else if (element == 30) {  // Timelapse para mult fps
+                tft.fillRect(2, 18, 2, 2, BLACK);
+                tft.fillRect(2, 37, 2, 2, BLACK);
+                tft.fillRect(2, 52, 2, 2, WHITE);
+            } else if (element == 31) {  // Timelapse para raw delay
+                tft.fillRect(2, 18, 2, 2, BLACK);
+                tft.fillRect(2, 42, 2, 2, WHITE);
+            } else if (element == 32) {  // Timelapse para raw delay
+                tft.fillRect(2, 18, 2, 2, WHITE);
+                tft.fillRect(2, 42, 2, 2, BLACK);
+            } else if (element == 33) {  // Timelapse para raw delay value
+
+                int rawDelay = 0;
+                xQueueReceive(queueOledCmd, &rawDelay, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(5, 40, 90, 20, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(WHITE);
+                tft.setCursor(5, 40);
+                tft.printf("Raw delay:\n    %d ms", rawDelay);
+
+            } else if (element == 34) {  // Timelapse mult factor value
+
+                int multFactor = 0;
+                xQueueReceive(queueOledCmd, &multFactor, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(5, 35, 90, 8, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(WHITE);
+                tft.setCursor(5, 35);
+                tft.printf("Multi factor: %d", multFactor);
+
+            } else if (element == 35) {  // Timelapse mult fps value
+                int multFps = 0;
+                xQueueReceive(queueOledCmd, &multFps, 100 / portTICK_PERIOD_MS);
+
+                tft.fillRect(5, 50, 90, 8, BLACK);
+                tft.setTextScale(1);
+                tft.setTextColor(WHITE);
+                tft.setCursor(5, 50);
+                tft.printf("Fps: %d", multFps);
+
             } else {
                 tft.fillRect(0, 0, 61, 12, BLACK);
                 tft.setCursor(0, 0);
@@ -649,9 +897,13 @@ void oledCode(void *pvParameters) {
 }
 
 void fillBatteryIcon(int value) {
-    int valueProcessed = (value * 0.2141 - 312.5) / 10;
+    int batteryLevel = (value * 0.2532 - 936.71) / 10;  //value == 3700 => minimum !!!
+
+    Serial.printf("analogBatterie: %d\n", value);
+    Serial.printf("batteryLevel: %d\n", batteryLevel);
+    //int valueProcessed = (value * 0.2141 - 312.5) / 10;
     tft.fillRect(63, 6, 10, 5, BLACK);
-    switch (valueProcessed) {
+    switch (batteryLevel) {
         case 10:
             tft.drawLine(63, 6, 63, 10, GREEN);
         case 9:
