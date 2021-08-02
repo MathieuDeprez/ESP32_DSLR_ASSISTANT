@@ -6,7 +6,7 @@
 SSD_13XX tft = SSD_13XX(CS_OLED, DC_OLED);
 BluetoothSerial static SerialBT;
 ImageDump imageDump;
-int CountLvSend = 1;
+
 QueueHandle_t queueOledCmd = nullptr;
 QueueHandle_t queueCmdDslr = nullptr;
 
@@ -28,20 +28,11 @@ const uint8_t logoCam[] = {0x07, 0x00, 0x0f, 0x80, 0x78, 0xf0, 0xc0, 0x18, 0x87,
                            0x87, 0x08, 0x80, 0x08, 0xff, 0xf8};
 char timeLapseParameterFixe[][21] = {"Initial/final length", "Mult. factor", "Raw delay"};
 
-//#include <simplefifo.h>
-
-/*CamStateHandlers CamStates;
-USB Usb;
-USBHub Hub1(&Usb);
-PTP Ptp(&Usb, &CamStates);*/
-
-void handleTimeLapse(Nikon &nikon);
-
-unsigned long TIMER_TL = millis();
 int NUMBER_TL = 0;
 int TIMER_TIMELAPSE = 3000;  //ms
 bool TL_ENABLE = false;
 void handleTimeLapse(Nikon &nikon) {
+    static unsigned long TIMER_TL = millis();
     if (TL_ENABLE && millis() - TIMER_TL > TIMER_TIMELAPSE) {
         NUMBER_TL++;
         Serial.print("TimeLapse Photo:");
@@ -60,7 +51,6 @@ void handleTimeLapse(Nikon &nikon) {
 }
 
 uint8_t Nikon::Poll() {
-    static bool first_time = true;
     PTP::Poll();
 
     if (!bPollEnabled)
@@ -68,207 +58,129 @@ uint8_t Nikon::Poll() {
 
     handleTimeLapse(*this);
 
-    //if (first_time)
-    //InitiateCapture();
-
     uint32_t current_time = millis();
 
     if (current_time >= nextPollTime) {
-        //Serial.println("\r\n");
-        //Serial.println("pool");
-
         bool receivedSomething = false;
-        if (SerialBT.available()) {
+        if (SerialBT.available()) {  //On recoit quelque chose via Bluetooth
             Serial.println("\r\n");
             Serial.print("received: ");
         }
         bool liveViewOn = false;
         while (SerialBT.available()) {
             int received = SerialBT.read();
-            Serial.write(received);
-            if (received == 'S') {
+            Serial.println(received);
+            if (received == static_cast<int>(MyBluetoothCode::ShutterSpeedIn)) {
                 setShutterSpeed(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'V') {
+            } else if (received == static_cast<int>(MyBluetoothCode::ApertureIn)) {
                 setAperture(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'O') {
+            } else if (received == static_cast<int>(MyBluetoothCode::IsoIn)) {
                 setIso(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'I') {
+            } else if (received == static_cast<int>(MyBluetoothCode::InfoIn)) {
                 getInfo(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'X') {
+            } else if (received == static_cast<int>(MyBluetoothCode::ExpoBiasIn)) {
                 setExpoBias(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'D') {
+            } else if (received == static_cast<int>(MyBluetoothCode::MoveFocusIn)) {
                 moveFocusAndroid(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'C') {
+            } else if (received == static_cast<int>(MyBluetoothCode::TakePhotoIn)) {
                 takePhotoAndroid(*this, SerialBT);
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'T') {
-                //takeTimeLapse(*this, SerialBT);
-
-                char timerReceived[10] = {};
-                uint8_t sizeReceived = 0;
-                while (SerialBT.available()) {
-                    uint8_t received = SerialBT.read();
-                    if (sizeReceived > 10 || received == ';') {
-                        Serial.println("break takeTimeLapse");
-                        break;
-                    }
-                    timerReceived[sizeReceived] = received;
-                    sizeReceived++;
-                }
-
-                if (sizeReceived < 1) {
-                    Serial.println("misse info take timelapse android");
-                }
-
-                TIMER_TIMELAPSE = ((uint8_t)timerReceived[0] << 8) | (uint8_t)timerReceived[1];
-                Serial.print("TIMER_TIMELAPSE:");
-                Serial.println(TIMER_TIMELAPSE);
+            } else if (received == static_cast<int>(MyBluetoothCode::TimelapseIn)) {
+                takeTimeLapse(*this, SerialBT, TIMER_TIMELAPSE);
                 NUMBER_TL = 0;
                 TL_ENABLE = true;
-
                 SerialBT.flush();
                 delay(100);
-            } else if (received == 'F') {
-                if (SerialBT.available() >= 8) {
-                    uint32_t posFocus[2] = {};
+            } else if (received == static_cast<int>(MyBluetoothCode::PosFocusIn)) {
+                tryFocus(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+            } else if (received == static_cast<int>(MyBluetoothCode::HdrIn)) {
+                takeHdr(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+            } else if (received == static_cast<int>(MyBluetoothCode::LongExpoIn)) {
+                takeLongExposure(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+            } else if (received == static_cast<int>(MyBluetoothCode::ThumbnailIn)) {
+                downloadThumbnail(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+            } else if (received == static_cast<int>(MyBluetoothCode::ListHandles)) {
+                getAndSendListHandles(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+            } else if (received == static_cast<int>(MyBluetoothCode::JpegIn)) {
+                downloadJpeg(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+                Serial.println("end downloadJpeg");
 
-                    int posX1 = SerialBT.read();
-                    int posX2 = SerialBT.read();
-                    int posX3 = SerialBT.read();
-                    int posX4 = SerialBT.read();
-
-                    Serial.print("X: ");
-                    Serial.print(posX1);
-                    Serial.print("|");
-                    Serial.print(posX2);
-                    Serial.print("|");
-                    Serial.print(posX3);
-                    Serial.print("|");
-                    Serial.println(posX4);
-
-                    posFocus[0] = ((posX1 << 24) |
-                                   (posX2 << 16) |
-                                   (posX3 << 8) |
-                                   posX4);
-
-                    int posY1 = SerialBT.read();
-                    int posY2 = SerialBT.read();
-                    int posY3 = SerialBT.read();
-                    int posY4 = SerialBT.read();
-
-                    Serial.print("Y: ");
-                    Serial.print(posY1);
-                    Serial.print("|");
-                    Serial.print(posY2);
-                    Serial.print("|");
-                    Serial.print(posY3);
-                    Serial.print("|");
-                    Serial.println(posY4);
-
-                    posFocus[1] = ((posY1 << 24) |
-                                   (posY2 << 16) |
-                                   (posY3 << 8) |
-                                   posY4);
-                    Serial.print(" || X: ");
-                    Serial.print(posFocus[0]);
-                    Serial.print("  Y: ");
-                    Serial.println(posFocus[1]);
-                    tryFocus(*this, SerialBT, posFocus);
-                    SerialBT.flush();
-                    delay(100);
-                } else {
-                    Serial.println("focus, not enough parameters");
-                }
-            } else if (received == 'H') {
-                if (SerialBT.available() >= 4) {
-                    uint8_t hdrParams[3] = {};
-
-                    hdrParams[0] = SerialBT.read();
-                    hdrParams[1] = SerialBT.read();
-                    hdrParams[2] = SerialBT.read();
-
-                    Serial.print("HDR: ");
-                    Serial.print(hdrParams[0]);
-                    Serial.print(" ");
-                    Serial.print(hdrParams[1]);
-                    Serial.print(" ");
-                    Serial.println(hdrParams[2]);
-
-                    takeHdr(*this, SerialBT, hdrParams);
-                    SerialBT.flush();
-                    delay(100);
-                } else {
-                    Serial.println("hdr, not enough parameters");
-                }
-            } else if (received == 'L') {
-                uint8_t delay_01 = SerialBT.read();
-                uint8_t delay_02 = SerialBT.read();
-                if (SerialBT.read() == ';') {
-                    int delayLongExpo = delay_01 << 8 | delay_02;
-                    Serial.printf("\ndelayLongExpo: %d\n", delayLongExpo);
-                    takeLongExposure(*this, SerialBT, delayLongExpo);
-                } else {
-                    Serial.println("\nerror receiving long expo");
-                }
+                /*Serial.println("realease");
+                this->ResetDevice();
+                this->pUsb->reset();
+                if (this->pUsb->Init() == -1)
+                    Serial.println("OSC did not start.");*/
+                ESP.restart();
+            } else if (received == static_cast<int>(MyBluetoothCode::JpegHqIn)) {
+                downloadJpegHq(*this, SerialBT);
+                SerialBT.flush();
+                delay(100);
+                Serial.println("end downloadJpegHq");
+                ESP.restart();
             }
-
-            if (received == 'A') {  // Start Live View
+            //LiveView
+            if (received == static_cast<int>(MyBluetoothCode::LiveViewOn)) {  // Start Live View
                 liveViewOn = true;
-            } else if (received == 'B') {  // Stop live View
+            } else if (received == static_cast<int>(MyBluetoothCode::LiveViewOff)) {  // Stop live View
                 liveViewOn = false;
                 stopLiveView(*this, SerialBT);
             }
         }
 
+        static int CountLvSend = 1;
         if (liveViewOn && CountLvSend > 0) {
             CountLvSend--;
             Serial.println();
             uint8_t buf;
-            GetDevicePropValue(0xD1A2, (uint8_t &)buf);
+            GetDevicePropValue(MyPcode::LiveView, (uint8_t &)buf);
 
             Serial.print("Live View Status : ");
             Serial.println(buf);
 
             unsigned long imageSendTimer = millis();
 
-            if (false) {
-                uint8_t(*bufRaw) = new uint8_t[20000];
-                bufRaw[0] = 0xFF;
-                bufRaw[1] = 0xD8;
-                bufRaw[2] = 0xFF;
-                bufRaw[19998] = 0xFF;
-                bufRaw[19999] = 0xD9;
-                SerialBT.write(bufRaw, 20000);
-                //Serial.println(SerialBT.flushWrite());
-                //while (SerialBT.flushWrite())
-                //    ;
-                delete[] bufRaw;
-            } else if (buf == 0) {
-                uint16_t ret = Operation(PTP_OC_NIKON_StartLiveView, 0, NULL);
-            } else {
-                HexPersoDumper myDumpPerso;
-                myDumpPerso.SetBl(&SerialBT);
+            if (buf == 0) {  //If liveview is not yet activated, do it
+                uint16_t ret = Operation(MyOpCode::StartLiveView, 0, NULL);
+            } else {  //Get an liveViewImage and send it to Android
+                //HexPersoDumper myDumpPerso;
+                //myDumpPerso.SetBl(&SerialBT);
                 //HexDump hex;
-                GetLiveViewImage(&myDumpPerso);
+                uint8_t *response;
+                uint32_t responseLenght;
+                GetLiveViewImageV2(response, responseLenght, SerialBT);
+
+                Serial.printf("Get liveview image, len:%d\n", responseLenght);
+
+                sendBluetoothData(SerialBT, MyBluetoothCode::LiveViewImageOut, response, responseLenght);
+
+                delete[] response;
                 //delay(1000);
             }
-
-            unsigned long timer = millis();
-            bool didWait = false;
-            //unsigned int flushWrite = SerialBT.flushWrite();
 
             Serial.print("timer A: ");
             Serial.print(millis() - imageSendTimer);
@@ -281,9 +193,7 @@ uint8_t Nikon::Poll() {
             Serial.print(" || timer sent: ");
             Serial.print(millis() - imageSendTimer);
             Serial.println("ms");
-            //Serial.println(SerialBT.flushWrite());
             CountLvSend++;
-            //delay(250);
         }
 
         uint16_t bufEvent[6] = {};
@@ -316,19 +226,37 @@ uint8_t Nikon::Poll() {
                 Serial.printf("TIMER_TIMELAPSE: %d\n", TIMER_TIMELAPSE);
                 NUMBER_TL = 0;
                 TL_ENABLE = true;
-            } /*else if (commande.para1 == 99) {
+            } else if (commande.para1 == 99) {
                 Serial.println("Debug cmd received!");
 
-                takePhotoDebug(*this, SerialBT);
-                SerialBT.flush();
+                //Get thumb
+                /*HexDump myDumpPerso;
+                GetThumb(0x0919000e, &myDumpPerso);
+*/
+                //HexDump dmp;
+                //GetObjectHandles(0xFFFFFFFF, 0, 0, &dmp);
 
-                for (int i = 0; i < 5; i++) {
-                    Serial.printf("EVENT CHECK AFTER TAKE PHOTO %d\n", i);
-                    uint16_t bufEvent[6] = {};
-                    EventCheck(bufEvent);
-                    printEvent(bufEvent, *this, SerialBT);
+                //ObjectHandlesDumper objectHandlesDumper;
+                //objectHandlesDumper.SetBl(&SerialBT);
+
+                uint8_t *response;
+                uint32_t responseLenght;
+                GetObjectHandlesV2(0xFFFFFFFF, 0, 0, response, responseLenght, SerialBT);
+
+                /*Serial.printf("Response exported len(%d):\n", responseLenght);
+                for (int i = 0; i < responseLenght; i++) {
+                    Serial.printf("%02x ", response[i]);
+                    if (!i % 16 && i)
+                        Serial.println();
                 }
-            }*/
+                Serial.println();*/
+
+                sendObjectHandlesBt(*this, SerialBT, response, responseLenght);
+
+                delete[] response;
+
+                //GetLiveViewImage(&objectHandlesDumper);
+            }
         }
 
         /*if (numberTouchPressed > 0 && millis() - timerTouchPin > 500) {

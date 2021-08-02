@@ -490,6 +490,10 @@ void modCamCode(void *pvParameters) {
                             break;
                         }
                         case FOCUS_MODE: {
+                            COMMANDE_DSLR commande;
+                            commande.para1 = 99;
+                            xQueueSend(queueCmdDslr, &commande, 0);
+
                             break;
                         }
                         case TIMELAPSE_MODE: {

@@ -72,18 +72,18 @@ uint8_t NikonDSLR::Init(uint8_t parent, uint8_t port, bool lowspeed) {
 }
 
 uint16_t NikonDSLR::Capture() {
-    return Operation(NK_OC_Capture, 0, NULL);
+    return Operation(MyOpCode::Capture, 0, NULL);
 }
 
 uint16_t NikonDSLR::CaptureInSDRAM() {
-    return Operation(NK_OC_CaptureInSDRAM, 0, NULL);
+    return Operation(MyOpCode::CaptureInSDRAM, 0, NULL);
 }
 
 uint16_t NikonDSLR::EventCheck(PTPReadParser *parser) {
     uint16_t ptp_error = PTP_RC_GeneralError;
     OperFlags flags = {0, 0, 0, 1, 1, 0};
 
-    if ((ptp_error = Transaction(NK_OC_CheckEvent, &flags, NULL, parser)) != PTP_RC_OK)
+    if ((ptp_error = Transaction(MyOpCode::CheckEvent, &flags, NULL, parser)) != PTP_RC_OK)
         PTPTRACE2("EventCheck error:", ptp_error);
 
     return ptp_error;
@@ -94,7 +94,7 @@ uint16_t NikonDSLR::EventCheck(uint16_t val[6]) {
     OperFlags flags = {0, 0, 0, 1, 4, 6};
     uint8_t bufLocal[12] = {};
 
-    if ((ptp_error = Transaction(NK_OC_CheckEvent, &flags, NULL, bufLocal)) != PTP_RC_OK) {
+    if ((ptp_error = Transaction(MyOpCode::CheckEvent, &flags, NULL, bufLocal)) != PTP_RC_OK) {
         PTPTRACE2("EventCheck error:", ptp_error);
     } else {
         /*Serial.println("\nHé");
@@ -118,13 +118,24 @@ uint16_t NikonDSLR::EventCheck(uint16_t val[6]) {
 uint16_t NikonDSLR::GetLiveViewImage(PTPReadParser *parser) {
     OperFlags flags = {0, 0, 0, 1, 1, 0};
 
-    return Transaction(PTP_OC_NIKON_GetLiveViewImg, &flags, NULL, parser);
+    return Transaction(MyOpCode::GetLiveViewImg, &flags, NULL, parser);
 }
 
 uint16_t NikonDSLR::GetLiveViewImage(HexPersoDumper *myDumpPerso) {
     OperFlags flags = {0, 0, 0, 1, 4, 0};
 
-    return TransactionPerso(PTP_OC_NIKON_GetLiveViewImg, &flags, myDumpPerso, NULL);
+    return TransactionImageLV(MyOpCode::GetLiveViewImg, &flags, myDumpPerso);
+}
+
+uint16_t NikonDSLR::GetLiveViewImageV2(uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
+    MyParamBlock myParamBlock;
+    myParamBlock.numberOfParam = 0;
+
+    MyDataBlock myDataBlock;
+    myDataBlock.dataSize = 0;
+    myDataBlock.txOperation = 0;
+
+    return TransactionV2(MyOpCode::GetLiveViewImg, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
 }
 
 uint16_t NikonDSLR::MoveFocus(uint8_t direction, uint16_t step) {
@@ -134,21 +145,21 @@ uint16_t NikonDSLR::MoveFocus(uint8_t direction, uint16_t step) {
     params[0] = (uint32_t)direction;
     params[1] = (uint32_t)step;
 
-    return Transaction(PTP_OC_NIKON_MfDrive, &flags, params, NULL);
+    return Transaction(MyOpCode::MfDrive, &flags, params, NULL);
 }
 
 void NikonDSLR::waitCameraReady(unsigned long timeout) {
     unsigned long timer = millis();
     uint16_t ret = PTP_RC_DeviceBusy;
-    ret = Operation(NK_OC_DeviceReady, 0, NULL);
+    ret = Operation(MyOpCode::DeviceReady, 0, NULL);
 
     while (ret == PTP_RC_DeviceBusy) {
-        if(millis()-timer>timeout){
+        if (millis() - timer > timeout) {
             Serial.println("Timeout wait Camera ready");
             return;
         }
         delay(200);
-        ret = Operation(NK_OC_DeviceReady, 0, NULL);
+        ret = Operation(MyOpCode::DeviceReady, 0, NULL);
         Serial.print("Ready : ");
         Serial.println(ret, HEX);
     }

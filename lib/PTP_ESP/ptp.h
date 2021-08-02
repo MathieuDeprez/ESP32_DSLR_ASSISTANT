@@ -17,6 +17,9 @@ e-mail   :  support@circuitsathome.com
 #ifndef __PTP_H__
 #define __PTP_H__
 
+#include <MyOpCode.h>
+#include <MyPcode.h>
+#include <ObjectHandlesDumper.h>
 #include <Usb.h>
 #include <hexdumpPerso.h>
 
@@ -89,6 +92,17 @@ class PTP : public USBDeviceConfig {
         uint16_t dataSize;     // size of data buffer (64 bytes maximum)
     };
 
+    struct MyParamBlock {
+        uint8_t numberOfParam;
+        uint32_t params[4];
+    };
+
+    struct MyDataBlock {
+        bool txOperation;
+        uint8_t dataSize;
+        uint8_t *data;
+    };
+
     typedef void (*READPARSER)(const uint16_t len, const uint8_t *pbuf, const uint32_t &offset);
 
     void FillEPRecords(USB_ENDPOINT_DESCRIPTOR *pep);
@@ -105,8 +119,10 @@ class PTP : public USBDeviceConfig {
     // the actual data is stored in a buffer pointed by buf
     bool CheckEvent(uint8_t size, uint8_t *buf);
 
-    uint16_t Transaction(uint16_t opcode, OperFlags *flags, uint32_t *params, void *pVoid);
-    uint16_t TransactionPerso(uint16_t opcode, OperFlags *flags, HexPersoDumper *myDumpPerso, uint32_t *params);
+    uint16_t Transaction(MyOpCode opcode, OperFlags *flags, uint32_t *params, void *pVoid);
+    uint16_t TransactionV2(MyOpCode opcode, MyParamBlock myParamBlock, MyDataBlock myDataBlock, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
+    uint16_t TransactionImageLV(MyOpCode opcode, OperFlags *flags, HexPersoDumper *myDumpPerso);
+    uint16_t TransactionObjectHandles(MyOpCode opcode, OperFlags *flags, uint32_t *params, ObjectHandlesDumper *objectHandlesDumper);
 
    public:
     PTP(USB *pusb, PTPStateHandlers *s);
@@ -123,8 +139,7 @@ class PTP : public USBDeviceConfig {
     virtual uint16_t EventCheck(PTPReadParser *parser);
 
     // Simple PTP operation which has no data stage. Any number of uint32_t params can be supplied.
-    uint16_t Operation(uint16_t opcode, uint8_t nparams = 0, uint32_t *params = NULL);
-
+    uint16_t Operation(MyOpCode opcode, uint8_t nparams = 0, uint32_t *params = NULL);
     uint16_t CaptureImage();
 
     uint16_t OpenSession();
@@ -133,34 +148,41 @@ class PTP : public USBDeviceConfig {
     uint16_t PowerDown();
     uint16_t SelfTest(uint16_t type);
     uint16_t GetDeviceInfo(PTPReadParser *parser);
-    uint16_t GetDevicePropDesc(const uint16_t pcode, PTPReadParser *parser);
-    uint16_t GetDevicePropValue(const uint16_t pcode, PTPReadParser *parser);
-    uint16_t GetDevicePropValue(const uint16_t pcode, uint8_t &val);
-    uint16_t GetDevicePropValue(const uint16_t pcode, uint16_t &val);
-    uint16_t GetDevicePropValue(const uint16_t pcode, uint32_t &val);
-    uint16_t GetDevicePropValue(const uint16_t pcode, int8_t &val);
-    uint16_t GetDevicePropValue(const uint16_t pcode, int16_t &val);
-    uint16_t GetDevicePropValue(const uint16_t pcode, int32_t &val);
-    uint16_t GetDevicePropValue(const uint16_t pcode, char val[11]);
-    uint16_t SetDevicePropValue(const uint16_t pcode, uint8_t val);
-    uint16_t SetDevicePropValue(const uint16_t pcode, uint16_t val);
-    uint16_t SetDevicePropValue(const uint16_t pcode, uint32_t val);
-    uint16_t SetDevicePropValue(const uint16_t pcode, int8_t val);
-    uint16_t SetDevicePropValue(const uint16_t pcode, int16_t val);
-    uint16_t SetDevicePropValue(const uint16_t pcode, int32_t val);
+    uint16_t GetDevicePropDesc(MyPcode pcode, PTPReadParser *parser);
+    uint16_t GetDevicePropValue(MyPcode pcode, PTPReadParser *parser);
+    uint16_t GetDevicePropValue(MyPcode pcode, uint8_t &val);
+    uint16_t GetDevicePropValue(MyPcode pcode, uint16_t &val);
+    uint16_t GetDevicePropValue(MyPcode pcode, uint32_t &val);
+    uint16_t GetDevicePropValue(MyPcode pcode, int8_t &val);
+    uint16_t GetDevicePropValue(MyPcode pcode, int16_t &val);
+    uint16_t GetDevicePropValue(MyPcode pcode, int32_t &val);
+    uint16_t GetDevicePropValue(MyPcode pcode, char val[11]);
+    uint16_t SetDevicePropValue(MyPcode pcode, uint8_t val);
+    uint16_t SetDevicePropValue(MyPcode pcode, uint16_t val);
+    uint16_t SetDevicePropValue(MyPcode pcode, uint32_t val);
+    uint16_t SetDevicePropValue(MyPcode pcode, int8_t val);
+    uint16_t SetDevicePropValue(MyPcode pcode, int16_t val);
+    uint16_t SetDevicePropValue(MyPcode pcode, int32_t val);
 
-    uint16_t SetDevicePropValue(const uint16_t pcode, const uint8_t val[19]);
+    uint16_t SetDevicePropValue(MyPcode pcode, const uint8_t val[19]);
 
-    uint16_t ResetDevicePropValue(const uint16_t pcode);
+    uint16_t ResetDevicePropValue(MyPcode pcode);
     uint16_t GetStorageIDs(PTPReadParser *parser);
     uint16_t GetStorageIDs(uint8_t bufsize, uint8_t *pbuf);
     uint16_t GetStorageInfo(uint32_t storage_id, PTPReadParser *parser);
     uint16_t GetObjectHandles(uint32_t storage_id, uint16_t format, uint16_t assoc, PTPReadParser *parser);
+    uint16_t GetObjectHandles(uint32_t storage_id, uint16_t format, uint16_t assoc, ObjectHandlesDumper *objectHandlesDumper);
+    uint16_t GetObjectHandlesV2(uint32_t storage_id, uint16_t format, uint16_t assoc, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
     uint16_t GetObjectInfo(uint32_t handle, PTPReadParser *parser);
+    uint16_t GetObjectInfoV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
     uint16_t GetObjectPropValue(uint32_t handle, uint32_t prop, PTPReadParser *parser);
     uint16_t FormatStore(uint32_t storage_id, uint32_t fsformat);
     uint16_t GetObject(uint32_t handle, PTPReadParser *parser);
+    uint16_t GetObjectV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
+    uint16_t GetJpegV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
+    uint16_t GetJpegHqV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
     uint16_t GetThumb(uint32_t handle, PTPReadParser *parser);
+    uint16_t GetThumbV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
 
     uint16_t GetNumObjects(uint32_t &retval, uint32_t storage_id = 0xffffffff, uint16_t format = 0, uint32_t assoc = 0);
     uint16_t DeleteObject(uint32_t handle, uint16_t format = 0);
