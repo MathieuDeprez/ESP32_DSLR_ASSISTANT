@@ -18,7 +18,6 @@ e-mail   :  support@circuitsathome.com
 #define __PTPCONSTITLES_H__
 
 #include "ptpconst.h"
-#include "mtpconst.h"
 #include "ptp.h"
 
 const char msgVendorDefined			[]  = "Vendor defined";

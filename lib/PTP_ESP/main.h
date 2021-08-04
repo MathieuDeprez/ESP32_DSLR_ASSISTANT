@@ -2,15 +2,9 @@
 #define _MAIN_H
 
 #include <Arduino.h>
-#include <MyBluetoothCode.h>
-#include <MyOpCode.h>
-#include <MyPcode.h>
-#include <myDumper.h>
-#include <nikon.h>
-//#include <psvaluetitles.h>
-//#include <main.h>
 #include <SPI.h>
 #include <SSD_13XX.h>
+#include <nikon.h>
 #include <ptp.h>
 #include <ptpdebug.h>
 #include <ptpdpparser.h>
@@ -56,59 +50,15 @@ extern valueNameStructUint16 LIST_EVENT[42];
 
 extern uint8_t HdrNbrPhotoArray[10];
 extern float HdrExpPasArray[9];
-//extern float HdrExpOffsetArray[19];
 
-extern QueueHandle_t queueOledCmd;
 extern QueueHandle_t queueCamMod;
 extern QueueHandle_t queueCmdDslr;
-
-bool getLiveView(Nikon &nikon, BluetoothSerial &SerialBT);
-void startLiveView(Nikon &nikon, BluetoothSerial &SerialBT);
-void stopLiveView(Nikon &nikon, BluetoothSerial &SerialBT);
-
-void getInfo(Nikon &nikon, BluetoothSerial &SerialBT);
-
-bool setShutterSpeed(Nikon &nikon, BluetoothSerial &SerialBT);
-int getShutterSpeed(Nikon &nikon, BluetoothSerial &SerialBT);
-
-bool setAperture(Nikon &nikon, BluetoothSerial &SerialBT);
-int getAperture(Nikon &nikon, BluetoothSerial &SerialBT);
-
-bool setIso(Nikon &nikon, BluetoothSerial &SerialBT);
-int getIso(Nikon &nikon, BluetoothSerial &SerialBT);
-
-bool setExpoBias(Nikon &nikon, BluetoothSerial &SerialBT);
-int getExpoBias(Nikon &nikon, BluetoothSerial &SerialBT);
-
-int getExpositionMode(Nikon &nikon, BluetoothSerial &SerialBT);
-
-void tryFocus(Nikon &nikon, BluetoothSerial &SerialBT);
-void takeHdr(Nikon &nikon, BluetoothSerial &SerialBT);
-void takeHdr(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *hdrParams);
-
-int getFocusMod(Nikon &nikon, BluetoothSerial &SerialBT);
-bool takePhotoAndroid(Nikon &nikon, BluetoothSerial &SerialBT);
-
-bool moveFocusAndroid(Nikon &nikon, BluetoothSerial &SerialBT);
-
-bool takeTimeLapse(Nikon &nikon, BluetoothSerial &SerialBT, int &timeTimelapse);
 
 void oledCode(void *pvParameters);
 void batterieLevelCode(void *pvParameters);
 
 void fillBatteryIcon(int value);
 void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param);
-void printEvent(uint16_t *bufEvent, Nikon &nikon, BluetoothSerial &SerialBT);
-void takeLongExposure(Nikon &nikon, BluetoothSerial &SerialBT);
-void sendObjectHandlesBt(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *response, uint32_t responseLenght);
-void sendBluetoothData(BluetoothSerial &SerialBT, MyBluetoothCode bluetoothCode, uint8_t *buf, int bufLen);
-bool downloadThumbnail(Nikon &nikon, BluetoothSerial &SerialBT);
-bool downloadJpeg(Nikon &nikon, BluetoothSerial &SerialBT);
-bool downloadJpegHq(Nikon &nikon, BluetoothSerial &SerialBT);
-void sendThumbnailBt(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *response, uint32_t responseLenght);
-//void sendJpegBt(Nikon &nikon, BluetoothSerial &SerialBT, uint8_t *response, uint32_t responseLenght);
-void handleTimeLapse(Nikon &nikon);
-void getAndSendListHandles(Nikon &nikon, BluetoothSerial &SerialBT);
 
 void IRAM_ATTR isr_1();
 void IRAM_ATTR isr_2();
@@ -124,6 +74,7 @@ struct COMMANDE_DSLR {
     uint8_t para5;
 };
 
+void handleTimeLapse(Nikon &nikon);
 void modCamCode(void *pvParameters);
 
 #endif

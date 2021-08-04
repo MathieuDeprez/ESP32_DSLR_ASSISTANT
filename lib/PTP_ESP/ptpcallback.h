@@ -17,10 +17,7 @@ e-mail   :  support@circuitsathome.com
 #if !defined(__PTPCALLBACK_H__)
 #define __PTPCALLBACK_H__
 
-#include <EventDumper.h>
 #include <Usb.h>
-#include <imageDumper.h>
-#include <myDumper.h>
 
 
 // Base class for incomming data parser
@@ -35,10 +32,5 @@ class PTPDataSupplier {
     virtual uint32_t GetDataSize() = 0;
     virtual void GetData(const uint16_t len, uint8_t *pbuf) = 0;
 };
-
-typedef HexDumper<PTPReadParser, uint16_t, uint32_t> HexDump;
-typedef MyDumper<PTPReadParser, uint16_t, uint32_t> MyDump;
-typedef ImageDumper<PTPReadParser, uint16_t, uint32_t> ImageDump;
-typedef EventDumper<PTPReadParser, uint16_t, uint32_t> EventDump;
 
 #endif  // __PTPCALLBACK_H__

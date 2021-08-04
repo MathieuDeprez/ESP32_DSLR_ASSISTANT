@@ -4,10 +4,9 @@
 #include "_icons/ble_orange.h"
 #include "_icons/wifi.c"
 SSD_13XX tft = SSD_13XX(CS_OLED, DC_OLED);
-BluetoothSerial static SerialBT;
-ImageDump imageDump;
+//BluetoothSerial static SerialBT;
 
-QueueHandle_t queueOledCmd = nullptr;
+//QueueHandle_t queueOledCmd = nullptr;
 QueueHandle_t queueCmdDslr = nullptr;
 
 class CamStateHandlers : public PTPStateHandlers {
@@ -56,12 +55,41 @@ uint8_t Nikon::Poll() {
     if (!bPollEnabled)
         return 0;
 
+    static bool setupPoll = true;
+    if (setupPoll) {
+        xTaskCreatePinnedToCore(
+            oledCode,        // Task function.
+            "oledFunction",  // name of task.
+            10000,           // Stack size of task
+            (void *)this,    // parameter of the task
+            1,               // priority of the task
+            NULL,            // Task handle to keep track of created task
+            1);
+
+        xTaskCreatePinnedToCore(
+            modCamCode,        // Task function.
+            "modCamFunction",  // name of task.
+            10000,             // Stack size of task
+            (void *)this,      // parameter of the task
+            1,                 // priority of the task
+            NULL,              // Task handle to keep track of created task
+            1);
+        setupPoll = false;
+    }
+
     handleTimeLapse(*this);
 
     uint32_t current_time = millis();
 
+    static unsigned long batteryTimer = millis();
+    if (millis() - batteryTimer > 5000) {
+        batteryTimer = millis();
+        const int batterieCode = 5;
+        if (queueOledCmd != nullptr)
+            xQueueSend(queueOledCmd, &batterieCode, 0);
+    }
+
     if (current_time >= nextPollTime) {
-        bool receivedSomething = false;
         if (SerialBT.available()) {  //On recoit quelque chose via Bluetooth
             Serial.println("\r\n");
             Serial.print("received: ");
@@ -71,61 +99,67 @@ uint8_t Nikon::Poll() {
             int received = SerialBT.read();
             Serial.println(received);
             if (received == static_cast<int>(MyBluetoothCode::ShutterSpeedIn)) {
-                setShutterSpeed(*this, SerialBT);
+                setShutterSpeed();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::ApertureIn)) {
-                setAperture(*this, SerialBT);
+                setAperture();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::IsoIn)) {
-                setIso(*this, SerialBT);
+                setIso();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::InfoIn)) {
-                getInfo(*this, SerialBT);
+                getInfo();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::ExpoBiasIn)) {
-                setExpoBias(*this, SerialBT);
+                setExpoBias();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::MoveFocusIn)) {
-                moveFocusAndroid(*this, SerialBT);
+                moveFocusAndroid();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::TakePhotoIn)) {
-                takePhotoAndroid(*this, SerialBT);
+                takePhotoAndroid();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::TimelapseIn)) {
-                takeTimeLapse(*this, SerialBT, TIMER_TIMELAPSE);
+                takeTimeLapse(TIMER_TIMELAPSE);
                 NUMBER_TL = 0;
                 TL_ENABLE = true;
                 SerialBT.flush();
                 delay(100);
+            } else if (received == static_cast<int>(MyBluetoothCode::TimelapseStop)) {
+                TIMER_TIMELAPSE = 1000;
+                NUMBER_TL = 0;
+                TL_ENABLE = false;
+                SerialBT.flush();
+                delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::PosFocusIn)) {
-                tryFocus(*this, SerialBT);
+                tryFocus();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::HdrIn)) {
-                takeHdr(*this, SerialBT);
+                takeHdr();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::LongExpoIn)) {
-                takeLongExposure(*this, SerialBT);
+                takeLongExposure();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::ThumbnailIn)) {
-                downloadThumbnail(*this, SerialBT);
+                downloadThumbnail();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::ListHandles)) {
-                getAndSendListHandles(*this, SerialBT);
+                getAndSendListHandles();
                 SerialBT.flush();
                 delay(100);
             } else if (received == static_cast<int>(MyBluetoothCode::JpegIn)) {
-                downloadJpeg(*this, SerialBT);
+                downloadJpeg();
                 SerialBT.flush();
                 delay(100);
                 Serial.println("end downloadJpeg");
@@ -137,7 +171,7 @@ uint8_t Nikon::Poll() {
                     Serial.println("OSC did not start.");*/
                 ESP.restart();
             } else if (received == static_cast<int>(MyBluetoothCode::JpegHqIn)) {
-                downloadJpegHq(*this, SerialBT);
+                downloadJpegHq();
                 SerialBT.flush();
                 delay(100);
                 Serial.println("end downloadJpegHq");
@@ -148,7 +182,7 @@ uint8_t Nikon::Poll() {
                 liveViewOn = true;
             } else if (received == static_cast<int>(MyBluetoothCode::LiveViewOff)) {  // Stop live View
                 liveViewOn = false;
-                stopLiveView(*this, SerialBT);
+                stopLiveView();
             }
         }
 
@@ -156,27 +190,26 @@ uint8_t Nikon::Poll() {
         if (liveViewOn && CountLvSend > 0) {
             CountLvSend--;
             Serial.println();
-            uint8_t buf;
-            GetDevicePropValue(MyPcode::LiveView, (uint8_t &)buf);
+            bool buf = getLiveView();
 
             Serial.print("Live View Status : ");
             Serial.println(buf);
 
             unsigned long imageSendTimer = millis();
 
-            if (buf == 0) {  //If liveview is not yet activated, do it
-                uint16_t ret = Operation(MyOpCode::StartLiveView, 0, NULL);
+            if (!buf) {  //If liveview is not yet activated, do it
+                startLiveView();
             } else {  //Get an liveViewImage and send it to Android
                 //HexPersoDumper myDumpPerso;
                 //myDumpPerso.SetBl(&SerialBT);
                 //HexDump hex;
                 uint8_t *response;
                 uint32_t responseLenght;
-                GetLiveViewImageV2(response, responseLenght, SerialBT);
+                GetLiveViewImageV2(response, responseLenght);
 
                 Serial.printf("Get liveview image, len:%d\n", responseLenght);
 
-                sendBluetoothData(SerialBT, MyBluetoothCode::LiveViewImageOut, response, responseLenght);
+                sendBluetoothData(MyBluetoothCode::LiveViewImageOut, response, responseLenght);
 
                 delete[] response;
                 //delay(1000);
@@ -199,7 +232,7 @@ uint8_t Nikon::Poll() {
         uint16_t bufEvent[6] = {};
         EventCheck(bufEvent);
 
-        printEvent(bufEvent, *this, SerialBT);
+        printEvent(bufEvent);
 
         COMMANDE_DSLR commande;
         if (xQueueReceive(queueCmdDslr, &commande, 0)) {
@@ -213,7 +246,7 @@ uint8_t Nikon::Poll() {
                 Serial.print(" ");
                 Serial.println(hdrParams[2]);
 
-                takeHdr(*this, SerialBT, hdrParams);
+                takeHdr(hdrParams);
             } else if (commande.para1 == 1) {  //Stop timelapse
                 TIMER_TIMELAPSE = 1000;
                 NUMBER_TL = 0;
@@ -241,7 +274,7 @@ uint8_t Nikon::Poll() {
 
                 uint8_t *response;
                 uint32_t responseLenght;
-                GetObjectHandlesV2(0xFFFFFFFF, 0, 0, response, responseLenght, SerialBT);
+                GetObjectHandlesV2(0xFFFFFFFF, 0, 0, response, responseLenght);
 
                 /*Serial.printf("Response exported len(%d):\n", responseLenght);
                 for (int i = 0; i < responseLenght; i++) {
@@ -251,11 +284,9 @@ uint8_t Nikon::Poll() {
                 }
                 Serial.println();*/
 
-                sendObjectHandlesBt(*this, SerialBT, response, responseLenght);
+                sendObjectHandlesBt(response, responseLenght);
 
                 delete[] response;
-
-                //GetLiveViewImage(&objectHandlesDumper);
             }
         }
 
@@ -265,7 +296,7 @@ uint8_t Nikon::Poll() {
 
             if (numberTouchPressed > 0) {
                 uint8_t hdrParams[3] = {3, 10, 15};
-                takeHdr(*this, SerialBT, hdrParams);
+                takeHdr(, hdrParams);
             }
 
             numberTouchPressed = 0;
@@ -278,38 +309,6 @@ uint8_t Nikon::Poll() {
     return 0;
 };
 
-void printEvent(uint16_t *bufEvent, Nikon &nikon, BluetoothSerial &SerialBT) {
-    int sizeList = sizeof(LIST_EVENT) / sizeof(LIST_EVENT[0]);
-
-    for (int i = 0; i < 6; i++) {
-        if (bufEvent[i] != 0x000) {
-            Serial.printf("%04x -> ", bufEvent[i]);
-            bool nameFound = false;
-            for (int j = 0; j < sizeList; j++) {
-                if (LIST_EVENT[j].value == bufEvent[i]) {
-                    Serial.println(LIST_EVENT[j].name);
-                    nameFound = true;
-
-                    if (strcmp("ExpTime", LIST_EVENT[j].name) == 0) {
-                        getShutterSpeed(nikon, SerialBT);
-                    } else if (strcmp("ExpPrgMod", LIST_EVENT[j].name) == 0) {
-                        getExpositionMode(nikon, SerialBT);
-                    } else if (strcmp("Fnumber", LIST_EVENT[j].name) == 0) {
-                        getAperture(nikon, SerialBT);
-                    } else if (strcmp("IsoCtlSen", LIST_EVENT[j].name) == 0) {
-                        getIso(nikon, SerialBT);
-                    }
-
-                    break;
-                }
-            }
-            if (!nameFound) {
-                Serial.println("Event Undefinned");
-            }
-        }
-    }
-}
-
 CamStateHandlers CamStates;
 USB Usb;
 USBHub Hub1(&Usb);
@@ -321,10 +320,10 @@ void CamStateHandlers::OnDeviceDisconnectedState(PTP *ptp
     if (stateConnected == stConnected || stateConnected == stInitial) {
         ((Nikon *)ptp)->bPollEnabled = false;
         stateConnected = stDisconnected;
-        E_Notify(PSTR("\r\nDevice disconnected.\r\n"), 0x80);
+        Serial.println("\r\nDevice disconnected.\r\n");
         const int deviceDisconnectedCode = 7;
-        if (queueOledCmd != nullptr)
-            xQueueSend(queueOledCmd, &deviceDisconnectedCode, 0);
+        if (ptp->queueOledCmd != nullptr)
+            xQueueSend(ptp->queueOledCmd, &deviceDisconnectedCode, 0);
     }
 }
 
@@ -332,29 +331,28 @@ void CamStateHandlers::OnDeviceInitializedState(PTP *ptp
                                                 __attribute__((unused))) {
     if (stateConnected == stDisconnected || stateConnected == stInitial) {
         stateConnected = stConnected;
-        E_Notify(PSTR("\r\nDevice connected.\r\n"), 0x80);
+        Serial.println("\r\nDevice connected.\r\n");
         ((Nikon *)ptp)->bPollEnabled = true;
 
         const int deviceConnectedCode = 6;
-        if (queueOledCmd != nullptr)
-            xQueueSend(queueOledCmd, &deviceConnectedCode, 0);
-
-    }  // if (stateConnected == stDisconnected || stateConnected == stInitial)
+        if (ptp->queueOledCmd != nullptr)
+            xQueueSend(ptp->queueOledCmd, &deviceConnectedCode, 0);
+    }
 }
 
-void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
+/*void callbackBluetooth(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
     const int btHasClientCode = 8;
     const int btNoClientCode = 9;
     if (event == ESP_SPP_SRV_OPEN_EVT) {
         Serial.println("Client Connected");
-        if (queueOledCmd != nullptr)
-            xQueueSend(queueOledCmd, &btHasClientCode, 0);
+        if (ptp->queueOledCmd != nullptr)
+            xQueueSend(ptp->queueOledCmd, &btHasClientCode, 0);
     } else if (event == ESP_SPP_CLOSE_EVT) {
         Serial.println("Client Disconnected");
-        if (queueOledCmd != nullptr)
-            xQueueSend(queueOledCmd, &btNoClientCode, 0);
+        if (ptp->queueOledCmd != nullptr)
+            xQueueSend(ptp->queueOledCmd, &btNoClientCode, 0);
     }
-}
+}*/
 
 void setup() {
     Serial.begin(115200);
@@ -375,19 +373,21 @@ void setup() {
     Serial.printf("\033[1;31m Some error\n\033[0m;");
     Serial.println("abc");
 
-    SerialBT.register_callback(callback);
-    SerialBT.begin("ESP32test");  //Bluetooth device name
-    imageDump.SetBl(&SerialBT);
-    Serial.print("timeout: ");
+    //Bluetooth init
+    //SerialBT.register_callback(callbackBluetooth);
+    //SerialBT.begin("ESP32test");  //Bluetooth device name
+
+    //Usb init
     if (Usb.Init() == -1)
         Serial.println("OSC did not start.");
 
     delay(200);
-    SerialBT.flush();
+    //SerialBT.flush();
 
     //delay(500);
     Serial.println("START 1s");
 
+    //Display init
     tft.begin();
     tft.setRotation(2);
 
@@ -404,32 +404,32 @@ void setup() {
 
     queueCmdDslr = xQueueCreate(10, sizeof(COMMANDE_DSLR));
 
-    xTaskCreatePinnedToCore(
+    /*xTaskCreatePinnedToCore(
         oledCode,        // Task function.
         "oledFunction",  // name of task.
         10000,           // Stack size of task
         NULL,            // parameter of the task
         1,               // priority of the task
         NULL,            // Task handle to keep track of created task
-        1);
+        1);*/
 
-    xTaskCreatePinnedToCore(
+    /*xTaskCreatePinnedToCore(
         batterieLevelCode,        // Task function.
         "batterieLevelFunction",  // name of task.
         1000,                     // Stack size of task
         NULL,                     // parameter of the task
         1,                        // priority of the task
         NULL,                     // Task handle to keep track of created task
-        1);
+        1);*/
 
-    xTaskCreatePinnedToCore(
+    /*xTaskCreatePinnedToCore(
         modCamCode,        // Task function.
         "modCamFunction",  // name of task.
         10000,             // Stack size of task
         NULL,              // parameter of the task
         1,                 // priority of the task
         NULL,              // Task handle to keep track of created task
-        1);
+        1);*/
 
     pinMode(14, INPUT_PULLUP);
     attachInterrupt(14, isr_1, FALLING);
@@ -457,28 +457,31 @@ void setup() {
 #define YELLOW 0xFFE0
 #define WHITE 0xFFFF
 
-void batterieLevelCode(void *pvParameters) {
+/*void batterieLevelCode(void *pvParameters) {
     while (1) {
         delay(5000);
         const int batterieCode = 5;
         if (queueOledCmd != nullptr)
             xQueueSend(queueOledCmd, &batterieCode, 0);
     }
-}
+}*/
 
 void oledCode(void *pvParameters) {
-    pinMode(34, INPUT);
-    queueOledCmd = xQueueCreate(10, sizeof(int));
+    Nikon *nikon;
+    nikon = (Nikon *)pvParameters;
 
-    while (queueOledCmd == NULL) {
+    pinMode(34, INPUT);
+    nikon->queueOledCmd = xQueueCreate(10, sizeof(int));
+
+    while (nikon->queueOledCmd == NULL) {
         Serial.println("Error creating the queueOledCmd");
     }
 
     tft.clearScreen();
     tft.fillScreen(BLACK);
 
-    uint16_t tftHeight = tft.height();  //64
-    uint16_t tftWidth = tft.width();    //96
+    //uint16_t tftHeight = tft.height();  //64
+    //uint16_t tftWidth = tft.width();    //96
 
     tft.fillRect(61, 0, 21, 12, BLACK);  //Zone batterie + cam + BT
 
@@ -500,11 +503,11 @@ void oledCode(void *pvParameters) {
     //float expOffset = 0.33;
 
     int initHdrMode = 10;
-    xQueueSend(queueOledCmd, &initHdrMode, 0);
+    xQueueSend(nikon->queueOledCmd, &initHdrMode, 0);
 
     while (1) {
         int element = 0;
-        if (xQueueReceive(queueOledCmd, &element, portMAX_DELAY)) {
+        if (xQueueReceive(nikon->queueOledCmd, &element, portMAX_DELAY)) {
             if (element == 1) {  // Changement mode
 
                 /*tft.fillRect(0, 0, 61, 12, BLACK);
@@ -620,7 +623,7 @@ void oledCode(void *pvParameters) {
             } else if (element == 16) {  // Value HDR - Nbr Photo
 
                 int indexNbrPhoto = 0;
-                xQueueReceive(queueOledCmd, &indexNbrPhoto, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &indexNbrPhoto, 100 / portTICK_PERIOD_MS);
                 tft.fillRect(5, 16, 90, 9, BLACK);
                 tft.setTextScale(1);
                 tft.setTextColor(WHITE);
@@ -630,7 +633,7 @@ void oledCode(void *pvParameters) {
             } else if (element == 17) {  // Value HDR - Exp Pas
 
                 int indexExpPas = 0;
-                xQueueReceive(queueOledCmd, &indexExpPas, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &indexExpPas, 100 / portTICK_PERIOD_MS);
                 tft.fillRect(5, 31, 90, 9, BLACK);
                 tft.setTextScale(1);
                 tft.setTextColor(WHITE);
@@ -640,7 +643,7 @@ void oledCode(void *pvParameters) {
             } else if (element == 18) {  // Value HDR - Exp Offset
 
                 int indexExpOffset = 0;
-                xQueueReceive(queueOledCmd, &indexExpOffset, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &indexExpOffset, 100 / portTICK_PERIOD_MS);
                 tft.fillRect(5, 46, 90, 9, BLACK);
                 tft.setTextScale(1);
                 tft.setTextColor(WHITE);
@@ -679,7 +682,7 @@ void oledCode(void *pvParameters) {
             } else if (element == 23) {  // Change value timelapse para fix
 
                 int indexParaFix = 0;
-                xQueueReceive(queueOledCmd, &indexParaFix, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &indexParaFix, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(0, 12, 96, 52, BLACK);
                 tft.setTextScale(1);
@@ -734,7 +737,7 @@ void oledCode(void *pvParameters) {
 
             } else if (element == 24) {  // Change value timelapse init len
                 int initLenValue = 0;
-                xQueueReceive(queueOledCmd, &initLenValue, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &initLenValue, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(5, 35, 55, 8, BLACK);
                 tft.setTextScale(1);
@@ -745,7 +748,7 @@ void oledCode(void *pvParameters) {
 
             } else if (element == 25) {  // Change value timelapse final len
                 int finalLenValue = 0;
-                xQueueReceive(queueOledCmd, &finalLenValue, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &finalLenValue, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(71, 35, 24, 8, BLACK);
                 tft.setTextScale(1);
@@ -755,7 +758,7 @@ void oledCode(void *pvParameters) {
 
             } else if (element == 26) {  // Change value timelapse fps
                 int fpsValue = 0;
-                xQueueReceive(queueOledCmd, &fpsValue, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &fpsValue, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(5, 50, 50, 8, BLACK);
                 tft.setTextScale(1);
@@ -784,7 +787,7 @@ void oledCode(void *pvParameters) {
             } else if (element == 33) {  // Timelapse para raw delay value
 
                 int rawDelay = 0;
-                xQueueReceive(queueOledCmd, &rawDelay, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &rawDelay, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(5, 40, 90, 20, BLACK);
                 tft.setTextScale(1);
@@ -795,7 +798,7 @@ void oledCode(void *pvParameters) {
             } else if (element == 34) {  // Timelapse mult factor value
 
                 int multFactor = 0;
-                xQueueReceive(queueOledCmd, &multFactor, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &multFactor, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(5, 35, 90, 8, BLACK);
                 tft.setTextScale(1);
@@ -805,7 +808,7 @@ void oledCode(void *pvParameters) {
 
             } else if (element == 35) {  // Timelapse mult fps value
                 int multFps = 0;
-                xQueueReceive(queueOledCmd, &multFps, 100 / portTICK_PERIOD_MS);
+                xQueueReceive(nikon->queueOledCmd, &multFps, 100 / portTICK_PERIOD_MS);
 
                 tft.fillRect(5, 50, 90, 8, BLACK);
                 tft.setTextScale(1);
@@ -827,8 +830,8 @@ void oledCode(void *pvParameters) {
 void fillBatteryIcon(int value) {
     int batteryLevel = (value * 0.2532 - 936.71) / 10;  //value == 3700 => minimum !!!
 
-    Serial.printf("analogBatterie: %d\n", value);
-    Serial.printf("batteryLevel: %d\n", batteryLevel);
+    //Serial.printf("analogBatterie: %d\n", value);
+    //Serial.printf("batteryLevel: %d\n", batteryLevel);
     //int valueProcessed = (value * 0.2141 - 312.5) / 10;
     tft.fillRect(63, 6, 10, 5, BLACK);
     switch (batteryLevel) {

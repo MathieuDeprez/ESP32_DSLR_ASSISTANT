@@ -190,32 +190,32 @@ bool ConfigDescParser<CLASS_ID, SUBCLASS_ID, PROTOCOL_ID, MASK>::ParseDescriptor
 
 template <const uint8_t CLASS_ID, const uint8_t SUBCLASS_ID, const uint8_t PROTOCOL_ID, const uint8_t MASK>
 void ConfigDescParser<CLASS_ID, SUBCLASS_ID, PROTOCOL_ID, MASK>::PrintHidDescriptor(const USB_HID_DESCRIPTOR *pDesc) {
-        Notify(PSTR("\r\n\r\nHID Descriptor:\r\n"), 0x80);
-        Notify(PSTR("bDescLength:\t\t"), 0x80);
+        E_Notify(PSTR("\r\n\r\nHID Descriptor:\r\n"), 0x80);
+        E_Notify(PSTR("bDescLength:\t\t"), 0x80);
         PrintHex<uint8_t > (pDesc->bLength, 0x80);
 
-        Notify(PSTR("\r\nbDescriptorType:\t"), 0x80);
+        E_Notify(PSTR("\r\nbDescriptorType:\t"), 0x80);
         PrintHex<uint8_t > (pDesc->bDescriptorType, 0x80);
 
-        Notify(PSTR("\r\nbcdHID:\t\t\t"), 0x80);
+        E_Notify(PSTR("\r\nbcdHID:\t\t\t"), 0x80);
         PrintHex<uint16_t > (pDesc->bcdHID, 0x80);
 
-        Notify(PSTR("\r\nbCountryCode:\t\t"), 0x80);
+        E_Notify(PSTR("\r\nbCountryCode:\t\t"), 0x80);
         PrintHex<uint8_t > (pDesc->bCountryCode, 0x80);
 
-        Notify(PSTR("\r\nbNumDescriptors:\t"), 0x80);
+        E_Notify(PSTR("\r\nbNumDescriptors:\t"), 0x80);
         PrintHex<uint8_t > (pDesc->bNumDescriptors, 0x80);
 
         for(uint8_t i = 0; i < pDesc->bNumDescriptors; i++) {
                 HID_CLASS_DESCRIPTOR_LEN_AND_TYPE *pLT = (HID_CLASS_DESCRIPTOR_LEN_AND_TYPE*)&(pDesc->bDescrType);
 
-                Notify(PSTR("\r\nbDescrType:\t\t"), 0x80);
+                E_Notify(PSTR("\r\nbDescrType:\t\t"), 0x80);
                 PrintHex<uint8_t > (pLT[i].bDescrType, 0x80);
 
-                Notify(PSTR("\r\nwDescriptorLength:\t"), 0x80);
+                E_Notify(PSTR("\r\nwDescriptorLength:\t"), 0x80);
                 PrintHex<uint16_t > (pLT[i].wDescriptorLength, 0x80);
         }
-        Notify(PSTR("\r\n"), 0x80);
+        E_Notify(PSTR("\r\n"), 0x80);
 }
 
 

@@ -238,6 +238,7 @@ valueNameStructUint16 LIST_EVENT[] = {
     {"LVProh", 0xD1A4},
     {"LVMovieMd", 0xD1AC},
     {"LVAfArea", 0x9205},
+    {"ExpRemain", 0xD1F1},
 
 };
 

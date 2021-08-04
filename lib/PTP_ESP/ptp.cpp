@@ -19,6 +19,8 @@ e-mail   :  support@circuitsathome.com
 #include "ptpconst.h"
 #include "ptpdebug.h"
 
+QueueHandle_t queueOledCmd = nullptr;
+
 void PTP::SetInitialState() {
     idSession = 0;
     idTransaction = ~((transaction_id_t)0);
@@ -239,6 +241,12 @@ uint8_t PTP::Init(uint8_t parent, uint8_t port, bool lowspeed __attribute__((unu
     Serial.print("PTP configured\r\n");
 
     bPollEnable = true;
+
+    //Bluetooth init
+    SerialBT.register_callback(::callbackBluetooth);
+    SerialBT.begin("DslrAssistant");  //Bluetooth device name
+    SerialBT.flush();
+
     return 0;
 
 FailGetDevDescr:
@@ -260,6 +268,20 @@ FailSetConfDescr:
 Fail:
     Serial.println(rcode, HEX);
     return rcode;
+}
+
+void callbackBluetooth(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
+    const int btHasClientCode = 8;
+    const int btNoClientCode = 9;
+    if (event == ESP_SPP_SRV_OPEN_EVT) {
+        Serial.println("Client Connected");
+        if (queueOledCmd != nullptr)
+            xQueueSend(queueOledCmd, &btHasClientCode, 0);
+    } else if (event == ESP_SPP_CLOSE_EVT) {
+        Serial.println("Client Disconnected");
+        if (queueOledCmd != nullptr)
+            xQueueSend(queueOledCmd, &btNoClientCode, 0);
+    }
 }
 
 void PTP::FillEPRecords(USB_ENDPOINT_DESCRIPTOR *pep) {
@@ -555,257 +577,6 @@ uint16_t PTP::Transaction(MyOpCode opcode, OperFlags *flags, uint32_t *params = 
     }  // end of scope
 }
 
-uint16_t PTP::TransactionImageLV(MyOpCode opcode, OperFlags *flags, HexPersoDumper *myDumpPerso) {
-    uint8_t rcode;
-    {                                            // send command block
-                                                 // Serial.print("Transaction: Send Command\r\n");
-        uint8_t cmd[PTP_USB_BULK_HDR_LEN + 12];  // header + 3 uint32_t parameters
-        ZerroMemory(PTP_USB_BULK_HDR_LEN + 12, cmd);
-
-        // Make command PTP container header
-        uint16_to_char(PTP_USB_CONTAINER_COMMAND, (unsigned char *)(cmd + PTP_CONTAINER_CONTYPE_OFF));     // type
-        uint16_to_char(static_cast<uint16_t>(opcode), (unsigned char *)(cmd + PTP_CONTAINER_OPCODE_OFF));  // code
-        uint32_to_char(++idTransaction, (unsigned char *)(cmd + PTP_CONTAINER_TRANSID_OFF));               // transaction id
-
-        uint8_t n = flags->opParams;  // number of parameters
-        uint8_t len;
-
-        *((uint8_t *)cmd) = PTP_USB_BULK_HDR_LEN;
-        len = PTP_USB_BULK_HDR_LEN;
-
-        rcode = pUsb->outTransfer(devAddress, epInfo[epDataOutIndex].epAddr, len, cmd);
-
-        if (rcode) {
-            //Serial.print("Transaction: Command block send error: ");
-            //Serial.println(rcode);
-            return PTP_RC_GeneralError;
-        }
-    }
-
-    // return 0;
-
-    {  // send data block
-        uint8_t data[PTP_MAX_RX_BUFFER_LEN];
-        uint32_t *pd32 = reinterpret_cast<uint32_t *>(data);
-
-        // Because inTransfer does not return the actual number of bytes received, it should be
-        // calculated here.
-        uint32_t total = 0, data_off = 0;  // Total PTP data packet size, Data offset
-        uint8_t inbuffer = 0;              // Number of bytes read into buffer
-        uint16_t loops = 0;                // Number of loops necessary to get all the data from device
-
-        while (1) {
-            ZerroMemory(PTP_MAX_RX_BUFFER_LEN, data);
-
-            uint16_t read = PTP_MAX_RX_BUFFER_LEN;
-
-            rcode = pUsb->inTransfer(devAddress, epInfo[epDataInIndex].epAddr, &read, data);
-
-            if (rcode) {
-                //Serial.print("Fatal USB Error\r\n");
-
-                // in some cases NAK handling might be necessary
-                //PTPTRACE2("Transaction: Response receive error 1", rcode);
-                Serial.print("Transaction: Response receive error 1P: ");
-                Serial.println(rcode);
-                return PTP_RC_GeneralError;
-            }
-
-            // This can occur in case of unsupported operation or successive response after data reception stage
-            if ((!loops || total == data_off) && *((uint16_t *)(data + PTP_CONTAINER_CONTYPE_OFF)) == PTP_USB_CONTAINER_RESPONSE) {
-                Serial.println("end get image LV !!");
-                uint16_t response = *((uint16_t *)(data + PTP_CONTAINER_OPCODE_OFF));
-                return response;
-            }
-
-            if (loops == 0) {
-                total = *pd32;
-                inbuffer = (total < PTP_MAX_RX_BUFFER_LEN) ? (uint8_t)total : PTP_MAX_RX_BUFFER_LEN;
-            } else {
-                inbuffer = ((total - data_off) > PTP_MAX_RX_BUFFER_LEN) ? PTP_MAX_RX_BUFFER_LEN : (uint8_t)(total - data_off);
-            }
-
-            myDumpPerso->Parse(inbuffer, data, (const uint32_t &)data_off, total);
-
-            data_off += inbuffer;
-            loops++;
-        }
-    }  // end of scope
-}
-
-uint16_t PTP::TransactionObjectHandles(MyOpCode opcode, OperFlags *flags, uint32_t *params = NULL, ObjectHandlesDumper *objectHandlesDumper = NULL) {
-    uint8_t rcode;
-    {                                            // send command block
-                                                 // Serial.print("Transaction: Send Command\r\n");
-        uint8_t cmd[PTP_USB_BULK_HDR_LEN + 12];  // header + 3 uint32_t parameters
-        ZerroMemory(PTP_USB_BULK_HDR_LEN + 12, cmd);
-
-        // Make command PTP container header
-        uint16_to_char(PTP_USB_CONTAINER_COMMAND, (unsigned char *)(cmd + PTP_CONTAINER_CONTYPE_OFF));     // type
-        uint16_to_char(static_cast<uint16_t>(opcode), (unsigned char *)(cmd + PTP_CONTAINER_OPCODE_OFF));  // code
-        uint32_to_char(++idTransaction, (unsigned char *)(cmd + PTP_CONTAINER_TRANSID_OFF));               // transaction id
-
-        uint8_t n = flags->opParams;  // number of parameters
-        uint8_t len;
-
-        if (params && *params) {
-            *((uint8_t *)cmd) = PTP_USB_BULK_HDR_LEN + (n << 2);
-            len = PTP_USB_BULK_HDR_LEN + (n << 2);
-
-            for (uint32_t *p1 = (uint32_t *)(cmd + PTP_CONTAINER_PAYLOAD_OFF), *p2 = (uint32_t *)params; n--; p1++, p2++) {
-                uint32_to_char(*p2, (unsigned char *)p1);
-            }
-        } else {
-            *((uint8_t *)cmd) = PTP_USB_BULK_HDR_LEN;
-            len = PTP_USB_BULK_HDR_LEN;
-        }
-
-        rcode = pUsb->outTransfer(devAddress, epInfo[epDataOutIndex].epAddr, len, cmd);
-
-        if (rcode) {
-            //Serial.print("Transaction: Command block send error: ");
-            //Serial.println(rcode);
-            return PTP_RC_GeneralError;
-        }
-    }
-
-    // return 0;
-
-    {  // send data block
-        uint8_t data[PTP_MAX_RX_BUFFER_LEN];
-        uint32_t *pd32 = reinterpret_cast<uint32_t *>(data);
-
-        // Because inTransfer does not return the actual number of bytes received, it should be
-        // calculated here.
-        uint32_t total = 0, data_off = 0;  // Total PTP data packet size, Data offset
-        uint8_t inbuffer = 0;              // Number of bytes read into buffer
-        uint16_t loops = 0;                // Number of loops necessary to get all the data from device
-
-        while (1) {
-            ZerroMemory(PTP_MAX_RX_BUFFER_LEN, data);
-
-            uint16_t read = PTP_MAX_RX_BUFFER_LEN;
-
-            rcode = pUsb->inTransfer(devAddress, epInfo[epDataInIndex].epAddr, &read, data);
-
-            if (rcode) {
-                //Serial.print("Fatal USB Error\r\n");
-
-                // in some cases NAK handling might be necessary
-                //PTPTRACE2("Transaction: Response receive error 1", rcode);
-                Serial.print("Transaction: Response receive error 1P: ");
-                Serial.println(rcode);
-                return PTP_RC_GeneralError;
-            }
-
-            // This can occur in case of unsupported operation or successive response after data reception stage
-            if ((!loops || total == data_off) && *((uint16_t *)(data + PTP_CONTAINER_CONTYPE_OFF)) == PTP_USB_CONTAINER_RESPONSE) {
-                Serial.println("end get objectHandles !!");
-                uint16_t response = *((uint16_t *)(data + PTP_CONTAINER_OPCODE_OFF));
-
-                if (response == PTP_RC_OK && *pd32 > PTP_USB_BULK_HDR_LEN) {
-                    Serial.println("response with parameter !!");
-                    uint8_t n = (*pd32 - PTP_USB_BULK_HDR_LEN) >> 2;
-                    flags->rsParams = n;
-                    for (uint32_t *p1 = (uint32_t *)(data + PTP_USB_BULK_HDR_LEN), *p2 = (uint32_t *)params; n; n--, p1++, p2++) {
-                        p2 = p1;
-                    }
-                }
-                if (response != PTP_RC_OK) {
-                    data_off = 0;
-                }
-                return response;
-            }
-
-            if (loops == 0) {
-                total = *pd32;
-                inbuffer = (total < PTP_MAX_RX_BUFFER_LEN) ? (uint8_t)total : PTP_MAX_RX_BUFFER_LEN;
-            } else {
-                inbuffer = ((total - data_off) > PTP_MAX_RX_BUFFER_LEN) ? PTP_MAX_RX_BUFFER_LEN : (uint8_t)(total - data_off);
-            }
-
-            objectHandlesDumper->Parse(inbuffer, data, (const uint32_t &)data_off, total);
-
-            data_off += inbuffer;
-            loops++;
-        }
-    }  // end of scope
-}
-
-uint16_t PTP::EventCheck(PTPReadParser *pParser) {
-    // uint8_t	data[PTP_MAX_EV_BUFFER_LEN];
-    uint8_t data[sizeof(PTPUSBEventContainer)];
-    uint32_t *pd32 = reinterpret_cast<uint32_t *>(data);
-    uint8_t rcode;
-
-    // Because inTransfer does not return the actual number of bytes received, it should be
-    // calculated here.
-    uint32_t total = 0;
-    uint32_t data_off = 0;
-    uint8_t inbuffer = 0;
-    uint16_t loops = 0;
-
-    while (1) {
-        ZerroMemory(sizeof(PTPUSBEventContainer), data);
-
-        uint16_t read = sizeof(PTPUSBEventContainer);
-
-        rcode = pUsb->inTransfer(devAddress, epInfo[epInterruptIndex].epAddr, &read, data);
-
-        switch (rcode) {
-            case 0x00:  // event data in incoming buffer
-                PTPTRACE2("EventCheck length: ", *data);
-                if (loops == 0) {
-                    // first pass of the parser
-                    total = *pd32;  // total event length
-                                    // read from IN packet
-                    inbuffer = (total < sizeof(PTPUSBEventContainer)) ? (uint8_t)total : sizeof(PTPUSBEventContainer);
-                } else {
-                    inbuffer = ((total - data_off) > sizeof(PTPUSBEventContainer)) ? sizeof(PTPUSBEventContainer) : (uint8_t)(total - data_off);
-                }
-                if (pParser) {
-                    pParser->Parse(inbuffer, data, (const uint32_t &)data_off);
-                }
-                data_off += inbuffer;
-                loops++;
-                delay(50);
-                return (PTP_RC_OK);
-
-            // In case of no event occurred
-            case 0x04:  // NAK
-                PTPTRACE2("EventCheck NAK: ", rcode);
-                return PTP_EC_Undefined;
-
-            case 0xFF:
-                return PTP_EC_Undefined;
-
-            default:
-                // in case of a usb error
-                PTPTRACE2("EventCheck USB error: ", rcode);
-                return PTP_RC_GeneralError;
-        }  // switch(rcode...
-
-#if 0
-		if (loops == 0)
-		{
-			total		=	*pd32;
-			inbuffer	=	(total < PTP_MAX_EV_BUFFER_LEN) ? (uint8_t)total : PTP_MAX_EV_BUFFER_LEN;
-		}
-		else
-			inbuffer = ((total - data_off) > PTP_MAX_EV_BUFFER_LEN) ? PTP_MAX_EV_BUFFER_LEN : (uint8_t)(total - data_off);
-
-		if (pParser)
-			pParser->Parse(inbuffer, data, (const uint32_t&)data_off);
-		
-		data_off += inbuffer;
-
-		loops ++;
-		delay(50);
-#endif
-
-    }  // while(1)
-}
-
 bool PTP::CheckEvent(uint8_t size, uint8_t *buf) {
     ZerroMemory(size, buf);
 
@@ -872,74 +643,6 @@ uint16_t PTP::GetNumObjects(uint32_t &retval,
     return ptp_error;
 }
 
-uint16_t PTP::GetObjectV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
-    MyParamBlock myParamBlock;
-    myParamBlock.numberOfParam = 1;
-    myParamBlock.params[0] = handle;
-
-    MyDataBlock myDataBlock;
-    myDataBlock.dataSize = 0;
-    myDataBlock.txOperation = 0;
-
-    return TransactionV2(MyOpCode::GetObject, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
-}
-
-uint16_t PTP::GetJpegV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
-    MyParamBlock myParamBlock;
-    myParamBlock.numberOfParam = 1;
-    myParamBlock.params[0] = handle;
-    myParamBlock.params[1] = 0;  //0= JPEG
-
-    MyDataBlock myDataBlock;
-    myDataBlock.dataSize = 0;
-    myDataBlock.txOperation = 0;
-
-    return TransactionV2(MyOpCode::GetObject, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
-}
-
-uint16_t PTP::GetJpegHqV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
-    MyParamBlock myParamBlock;
-    myParamBlock.numberOfParam = 1;
-    myParamBlock.params[0] = handle;
-    myParamBlock.params[1] = 1;  //1 = JPEG HQ
-
-    MyDataBlock myDataBlock;
-    myDataBlock.dataSize = 0;
-    myDataBlock.txOperation = 0;
-
-    return TransactionV2(MyOpCode::GetObject, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
-}
-
-uint16_t PTP::GetObject(uint32_t handle, PTPReadParser *parser) {
-    OperFlags flags = {1, 0, 0, 1, 1, 0};
-    uint32_t params[1];
-
-    params[0] = handle;
-
-    return Transaction(MyOpCode::GetObject, &flags, params, parser);
-}
-
-uint16_t PTP::GetThumb(uint32_t handle, PTPReadParser *parser) {
-    OperFlags flags = {1, 0, 0, 1, 1, 0};
-    uint32_t params[1];
-
-    params[0] = handle;
-
-    return Transaction(MyOpCode::GetThumb, &flags, params, parser);
-}
-
-uint16_t PTP::GetThumbV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
-    MyParamBlock myParamBlock;
-    myParamBlock.numberOfParam = 1;
-    myParamBlock.params[0] = handle;
-
-    MyDataBlock myDataBlock;
-    myDataBlock.dataSize = 0;
-    myDataBlock.txOperation = 0;
-
-    return TransactionV2(MyOpCode::GetThumb, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
-}
-
 uint16_t PTP::DeleteObject(uint32_t handle, uint16_t format) {
     OperFlags flags = {2, 0, 0, 0, 0, 0};
     uint32_t params[2];
@@ -966,7 +669,7 @@ uint16_t PTP::MoveObject(uint32_t handle, uint32_t storage_id, uint32_t parent) 
 
     params[0] = handle;
     params[1] = storage_id;
-    params[2] = parent;
+    //params[2] = parent;
 
     return Transaction(MyOpCode::MoveObject, &flags, params);
 }
@@ -1052,28 +755,6 @@ uint16_t PTP::GetDeviceInfo(PTPReadParser *parser) {
     return Transaction(MyOpCode::GetDeviceInfo, &flags, NULL, parser);
 }
 
-uint16_t PTP::GetObjectInfo(uint32_t handle, PTPReadParser *parser) {
-    OperFlags flags = {1, 0, 0, 1, 1, 0};
-    uint32_t params[1];
-    params[0] = handle;
-
-    return Transaction(MyOpCode::GetObjectInfo, &flags, params, parser);
-}
-
-uint16_t PTP::GetObjectInfoV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
-    OperFlags flags = {1, 0, 0, 1, 1, 0};
-
-    MyParamBlock myParamBlock;
-    myParamBlock.numberOfParam = 1;
-    myParamBlock.params[0] = handle;
-
-    MyDataBlock myDataBlock;
-    myDataBlock.dataSize = 0;
-    myDataBlock.txOperation = 0;
-
-    return TransactionV2(MyOpCode::GetObjectInfo, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
-}
-
 uint16_t PTP::GetObjectPropValue(uint32_t handle, uint32_t prop, PTPReadParser *parser) {
     OperFlags flags = {2, 0, 0, 1, 1, 0};
     uint32_t params[2];
@@ -1089,15 +770,6 @@ uint16_t PTP::GetDevicePropDesc(MyPcode pcode, PTPReadParser *parser) {
 
     params[0] = (uint32_t)pcode;
     return Transaction(static_cast<MyOpCode>(pcode), &flags, params, parser);
-}
-
-uint16_t PTP::GetDevicePropValue(MyPcode pcode, PTPReadParser *parser) {
-    OperFlags flags = {1, 0, 0, 1, 1, 0};
-    uint32_t params[1];
-
-    params[0] = (uint32_t) static_cast<uint16_t>(pcode);
-
-    return Transaction(MyOpCode::GetDevicePropValue, &flags, params, parser);
 }
 
 uint16_t PTP::GetDevicePropValue(MyPcode pcode, uint8_t &val) {
@@ -1128,23 +800,6 @@ uint16_t PTP::GetDevicePropValue(MyPcode pcode, uint16_t &val) {
     return ptp_error;
 }
 
-uint16_t PTP::GetDevicePropValue(MyPcode pcode, char val[11]) {
-    uint16_t ptp_error = PTP_RC_GeneralError;
-    OperFlags flags = {1, 0, 0, 0, 3, 34};
-    uint32_t params[1];
-    uint8_t buf[34];
-
-    params[0] = static_cast<uint16_t>(pcode);
-
-    if ((ptp_error = Transaction(MyOpCode::GetDevicePropValue, &flags, params, buf)) == PTP_RC_OK) {
-        for (int p = 13, i = 0; p < sizeof(buf) - 1; p += 2, i++) {
-            val[i] = buf[p];
-        }
-    }
-
-    return ptp_error;
-}
-
 uint16_t PTP::GetDevicePropValue(MyPcode pcode, uint32_t &val) {
     uint16_t ptp_error = PTP_RC_GeneralError;
     OperFlags flags = {1, 0, 0, 0, 3, 16};
@@ -1157,56 +812,6 @@ uint16_t PTP::GetDevicePropValue(MyPcode pcode, uint32_t &val) {
         val = buf[3];
 
     return ptp_error;
-}
-
-uint16_t PTP::GetDevicePropValue(MyPcode pcode, int8_t &val) {
-    uint16_t ptp_error = PTP_RC_GeneralError;
-    OperFlags flags = {1, 0, 0, 0, 3, 13};
-    uint32_t params[1];
-    uint8_t buf[13];
-
-    params[0] = (uint32_t) static_cast<uint16_t>(pcode);
-
-    if ((ptp_error = Transaction(MyOpCode::GetDevicePropValue, &flags, params, buf)) == PTP_RC_OK)
-        val = buf[12];
-
-    return ptp_error;
-}
-
-uint16_t PTP::GetDevicePropValue(MyPcode pcode, int16_t &val) {
-    uint16_t ptp_error = PTP_RC_GeneralError;
-    OperFlags flags = {1, 0, 0, 0, 3, 14};
-    uint32_t params[1];
-    uint16_t buf[7];
-
-    params[0] = static_cast<uint16_t>(pcode);
-
-    if ((ptp_error = Transaction(MyOpCode::GetDevicePropValue, &flags, params, buf)) == PTP_RC_OK)
-        val = buf[6];
-
-    return ptp_error;
-}
-
-uint16_t PTP::GetDevicePropValue(MyPcode pcode, int32_t &val) {
-    uint16_t ptp_error = PTP_RC_GeneralError;
-    OperFlags flags = {1, 0, 0, 0, 3, 16};
-    uint32_t params[1];
-    uint32_t buf[4];
-
-    params[0] = static_cast<uint16_t>(pcode);
-
-    if ((ptp_error = Transaction(MyOpCode::GetDevicePropValue, &flags, params, buf)) == PTP_RC_OK)
-        val = buf[3];
-
-    return ptp_error;
-}
-
-uint16_t PTP::SetDevicePropValue(MyPcode pcode, const uint8_t val[19]) {
-    OperFlags flags = {1, 0, 1, 1, 3, 19};
-    uint32_t params[1];
-    params[0] = (uint32_t) static_cast<uint16_t>(pcode);
-
-    return Transaction(MyOpCode::SetDevicePropValue, &flags, params, (void *)val);
 }
 
 uint16_t PTP::SetDevicePropValue(MyPcode pcode, uint8_t val) {
@@ -1232,39 +837,6 @@ uint16_t PTP::SetDevicePropValue(MyPcode pcode, uint16_t val) {
 }
 
 uint16_t PTP::SetDevicePropValue(MyPcode pcode, uint32_t val) {
-    OperFlags flags = {1, 0, 1, 1, 3, 4};
-    uint32_t params[1];
-    uint32_t value;
-
-    params[0] = (uint32_t) static_cast<uint16_t>(pcode);
-    value = val;
-
-    return Transaction(MyOpCode::SetDevicePropValue, &flags, params, (void *)&value);
-}
-
-uint16_t PTP::SetDevicePropValue(MyPcode pcode, int8_t val) {
-    OperFlags flags = {1, 0, 1, 1, 3, 1};
-    uint32_t params[1];
-    uint8_t value;
-
-    params[0] = (uint32_t) static_cast<uint16_t>(pcode);
-    value = val;
-
-    return Transaction(MyOpCode::SetDevicePropValue, &flags, params, (void *)&value);
-}
-
-uint16_t PTP::SetDevicePropValue(MyPcode pcode, int16_t val) {
-    OperFlags flags = {1, 0, 1, 1, 3, 2};
-    uint32_t params[1];
-    uint16_t value;
-
-    params[0] = (uint32_t) static_cast<uint16_t>(pcode);
-    value = val;
-
-    return Transaction(MyOpCode::SetDevicePropValue, &flags, params, (void *)&value);
-}
-
-uint16_t PTP::SetDevicePropValue(MyPcode pcode, int32_t val) {
     OperFlags flags = {1, 0, 1, 1, 3, 4};
     uint32_t params[1];
     uint32_t value;
@@ -1366,44 +938,6 @@ uint16_t PTP::GetStorageIDs(uint8_t bufsize, uint8_t *pbuf) {
     flags.dataSize = bufsize;
 
     return Transaction(MyOpCode::GetStorageIDs, &flags, NULL, pbuf);
-}
-
-uint16_t PTP::GetObjectHandles(uint32_t storage_id, uint16_t format, uint16_t assoc, PTPReadParser *parser) {
-    OperFlags flags = {3, 0, 0, 1, 1, 0};
-    uint32_t params[3];
-
-    params[0] = storage_id;
-    params[1] = (uint32_t)format;
-    params[2] = (uint32_t)assoc;
-
-    return Transaction(MyOpCode::GetObjectHandles, &flags, params, parser);
-}
-
-uint16_t PTP::GetObjectHandles(uint32_t storage_id, uint16_t format, uint16_t assoc, ObjectHandlesDumper *objectHandlesDumper) {
-    OperFlags flags = {3, 0, 0, 1, 1, 0};
-    uint32_t params[3];
-
-    params[0] = storage_id;
-    params[1] = (uint32_t)format;
-    params[2] = (uint32_t)assoc;
-
-    return TransactionObjectHandles(MyOpCode::GetObjectHandles, &flags, params, objectHandlesDumper);
-}
-
-uint16_t PTP::GetObjectHandlesV2(uint32_t storage_id, uint16_t format, uint16_t assoc, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT) {
-    OperFlags flags = {3, 0, 0, 1, 1, 0};
-
-    MyParamBlock myParamBlock;
-    myParamBlock.numberOfParam = 3;
-    myParamBlock.params[0] = storage_id;
-    myParamBlock.params[1] = (uint32_t)format;
-    myParamBlock.params[2] = (uint32_t)assoc;
-
-    MyDataBlock myDataBlock;
-    myDataBlock.dataSize = 0;
-    myDataBlock.txOperation = 0;
-
-    return TransactionV2(MyOpCode::GetObjectHandles, myParamBlock, myDataBlock, response, responseLenght, SerialBT);
 }
 
 uint16_t PTP::SendObjectInfo(uint32_t handle, PTPDataSupplier *sup) {

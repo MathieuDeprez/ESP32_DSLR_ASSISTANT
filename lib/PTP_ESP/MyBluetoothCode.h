@@ -6,6 +6,7 @@ enum class MyBluetoothCode {
     LiveViewImageOut = 225,
     JpegOut = 226,
     JpegHqOut = 227,
+    EndObjectHandlesListOut = 228,
 
     ShutterSpeedIn = 83,
     ApertureIn = 86,
@@ -25,5 +26,5 @@ enum class MyBluetoothCode {
     JpegIn = 78,
     JpegHqIn = 80,
     RawIn = 81,
-
+    TimelapseStop = 69,
 };

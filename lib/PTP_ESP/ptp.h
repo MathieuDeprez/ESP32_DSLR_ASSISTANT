@@ -19,14 +19,12 @@ e-mail   :  support@circuitsathome.com
 
 #include <MyOpCode.h>
 #include <MyPcode.h>
-#include <ObjectHandlesDumper.h>
 #include <Usb.h>
-#include <hexdumpPerso.h>
 
+#include "BluetoothSerial.h"
 #include "ptpcallback.h"
 #include "ptpconst.h"
 #include "ptpdebug.h"
-#include "ptpmsgstr.h"
 
 // Buffer size should NEVER be less than USB packet size!!!!!!!!!!!!!!!!!!!!!
 #define PTP_MAX_RX_BUFFER_LEN 64
@@ -56,6 +54,9 @@ class PTPStateHandlers {
     virtual void OnDeviceBusyState(PTP *ptp);
 };
 
+void callbackBluetooth(esp_spp_cb_event_t event, esp_spp_cb_param_t *param);
+BluetoothSerial static SerialBT;
+
 class PTP : public USBDeviceConfig {
     uint8_t theState;
 
@@ -63,11 +64,12 @@ class PTP : public USBDeviceConfig {
     void SetInitialState();
     void Task();
 
-   private:
+   protected:
     typedef uint16_t transaction_id_t;
-
     transaction_id_t idTransaction;  // Transaction ID
-    uint16_t idSession;              // Session ID
+
+   private:
+    uint16_t idSession;  // Session ID
 
     PTPStateHandlers *stateMachine;
 
@@ -120,12 +122,11 @@ class PTP : public USBDeviceConfig {
     bool CheckEvent(uint8_t size, uint8_t *buf);
 
     uint16_t Transaction(MyOpCode opcode, OperFlags *flags, uint32_t *params, void *pVoid);
-    uint16_t TransactionV2(MyOpCode opcode, MyParamBlock myParamBlock, MyDataBlock myDataBlock, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-    uint16_t TransactionImageLV(MyOpCode opcode, OperFlags *flags, HexPersoDumper *myDumpPerso);
-    uint16_t TransactionObjectHandles(MyOpCode opcode, OperFlags *flags, uint32_t *params, ObjectHandlesDumper *objectHandlesDumper);
 
    public:
     PTP(USB *pusb, PTPStateHandlers *s);
+
+    QueueHandle_t queueOledCmd;
 
     // USBDeviceConfig implementation
     virtual uint8_t Init(uint8_t parent, uint8_t port, bool lowspeed);
@@ -136,8 +137,6 @@ class PTP : public USBDeviceConfig {
     void SetState(uint8_t state) { theState = state; };
     uint8_t GetState() { return theState; };
 
-    virtual uint16_t EventCheck(PTPReadParser *parser);
-
     // Simple PTP operation which has no data stage. Any number of uint32_t params can be supplied.
     uint16_t Operation(MyOpCode opcode, uint8_t nparams = 0, uint32_t *params = NULL);
     uint16_t CaptureImage();
@@ -147,57 +146,34 @@ class PTP : public USBDeviceConfig {
     uint16_t ResetDevice();
     uint16_t PowerDown();
     uint16_t SelfTest(uint16_t type);
-    uint16_t GetDeviceInfo(PTPReadParser *parser);
-    uint16_t GetDevicePropDesc(MyPcode pcode, PTPReadParser *parser);
-    uint16_t GetDevicePropValue(MyPcode pcode, PTPReadParser *parser);
+
+    uint16_t GetDeviceInfo(PTPReadParser *parser);                                                                        //not used
+    uint16_t GetDevicePropDesc(MyPcode pcode, PTPReadParser *parser);                                                     //not used
+    uint16_t GetStorageIDs(PTPReadParser *parser);                                                                        //not used
+    uint16_t GetStorageIDs(uint8_t bufsize, uint8_t *pbuf);                                                               //not used
+    uint16_t GetStorageInfo(uint32_t storage_id, PTPReadParser *parser);                                                  //not used
+    uint16_t GetObjectPropValue(uint32_t handle, uint32_t prop, PTPReadParser *parser);                                   //not used
+    uint16_t FormatStore(uint32_t storage_id, uint32_t fsformat);                                                         //not used
+    uint16_t GetNumObjects(uint32_t &retval, uint32_t storage_id = 0xffffffff, uint16_t format = 0, uint32_t assoc = 0);  //not used
+    uint16_t DeleteObject(uint32_t handle, uint16_t format = 0);                                                          //not used
+    uint16_t SetObjectProtection(uint32_t handle, uint16_t attrib);                                                       //not used
+    uint16_t MoveObject(uint32_t handle, uint32_t storage_id, uint32_t parent);                                           //not used
+    uint16_t CopyObject(uint32_t handle, uint32_t storage_id, uint32_t parent, uint32_t &new_handle);                     //not used
+    uint16_t InitiateOpenCapture(uint32_t storage_id = 0, uint16_t format = 0);                                           //not used
+    uint16_t TerminateOpenCapture(uint32_t trans_id);                                                                     //not used
+    uint16_t SendObjectInfo(uint32_t handle, PTPDataSupplier *sup);                                                       //not used
+    uint16_t SendObject(uint32_t handle, PTPDataSupplier *sup);                                                           //not used
+
+    uint16_t ResetDevicePropValue(MyPcode pcode);
     uint16_t GetDevicePropValue(MyPcode pcode, uint8_t &val);
     uint16_t GetDevicePropValue(MyPcode pcode, uint16_t &val);
     uint16_t GetDevicePropValue(MyPcode pcode, uint32_t &val);
-    uint16_t GetDevicePropValue(MyPcode pcode, int8_t &val);
-    uint16_t GetDevicePropValue(MyPcode pcode, int16_t &val);
-    uint16_t GetDevicePropValue(MyPcode pcode, int32_t &val);
-    uint16_t GetDevicePropValue(MyPcode pcode, char val[11]);
+
     uint16_t SetDevicePropValue(MyPcode pcode, uint8_t val);
     uint16_t SetDevicePropValue(MyPcode pcode, uint16_t val);
     uint16_t SetDevicePropValue(MyPcode pcode, uint32_t val);
-    uint16_t SetDevicePropValue(MyPcode pcode, int8_t val);
-    uint16_t SetDevicePropValue(MyPcode pcode, int16_t val);
-    uint16_t SetDevicePropValue(MyPcode pcode, int32_t val);
 
-    uint16_t SetDevicePropValue(MyPcode pcode, const uint8_t val[19]);
-
-    uint16_t ResetDevicePropValue(MyPcode pcode);
-    uint16_t GetStorageIDs(PTPReadParser *parser);
-    uint16_t GetStorageIDs(uint8_t bufsize, uint8_t *pbuf);
-    uint16_t GetStorageInfo(uint32_t storage_id, PTPReadParser *parser);
-    uint16_t GetObjectHandles(uint32_t storage_id, uint16_t format, uint16_t assoc, PTPReadParser *parser);
-    uint16_t GetObjectHandles(uint32_t storage_id, uint16_t format, uint16_t assoc, ObjectHandlesDumper *objectHandlesDumper);
-    uint16_t GetObjectHandlesV2(uint32_t storage_id, uint16_t format, uint16_t assoc, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-    uint16_t GetObjectInfo(uint32_t handle, PTPReadParser *parser);
-    uint16_t GetObjectInfoV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-    uint16_t GetObjectPropValue(uint32_t handle, uint32_t prop, PTPReadParser *parser);
-    uint16_t FormatStore(uint32_t storage_id, uint32_t fsformat);
-    uint16_t GetObject(uint32_t handle, PTPReadParser *parser);
-    uint16_t GetObjectV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-    uint16_t GetJpegV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-    uint16_t GetJpegHqV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-    uint16_t GetThumb(uint32_t handle, PTPReadParser *parser);
-    uint16_t GetThumbV2(uint32_t handle, uint8_t *&response, uint32_t &responseLenght, BluetoothSerial &SerialBT);
-
-    uint16_t GetNumObjects(uint32_t &retval, uint32_t storage_id = 0xffffffff, uint16_t format = 0, uint32_t assoc = 0);
-    uint16_t DeleteObject(uint32_t handle, uint16_t format = 0);
-    uint16_t SetObjectProtection(uint32_t handle, uint16_t attrib);
-    uint16_t MoveObject(uint32_t handle, uint32_t storage_id, uint32_t parent);
-    uint16_t CopyObject(uint32_t handle, uint32_t storage_id, uint32_t parent, uint32_t &new_handle);
-    uint16_t InitiateOpenCapture(uint32_t storage_id = 0, uint16_t format = 0);
-    uint16_t TerminateOpenCapture(uint32_t trans_id);
     uint16_t InitiateCapture(uint32_t storage_id = 0, uint16_t format = 0);
-
-    uint16_t SendObjectInfo(uint32_t handle, PTPDataSupplier *sup);
-    uint16_t SendObject(uint32_t handle, PTPDataSupplier *sup);
-
-    // To be implemented in future releases
-    //uint16_t GetPartialObject(uint32_t handle, PTPReadParser *parser);
 };
 
 #endif  // __PTP_H__

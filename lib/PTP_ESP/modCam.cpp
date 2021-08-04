@@ -19,6 +19,10 @@
 QueueHandle_t queueCamMod = nullptr;
 
 void modCamCode(void *pvParameters) {
+
+    Nikon *nikon;
+    nikon = (Nikon *)pvParameters;
+
     queueCamMod = xQueueCreate(10, sizeof(int));
 
     while (queueCamMod == NULL) {
@@ -51,42 +55,42 @@ void modCamCode(void *pvParameters) {
                     paraHdrIndex = 0;
                     paraTimeLapseIndex = 0;
 
-                    if (oledChangeMod == 10 && queueOledCmd != nullptr) {  // HDR Mode
-                        xQueueSend(queueOledCmd, &oledChangeMod, 0);
+                    if (oledChangeMod == 10 && nikon->queueOledCmd != nullptr) {  // HDR Mode
+                        xQueueSend(nikon->queueOledCmd, &oledChangeMod, 0);
 
                         int oledResponseNbrPhotoValue = 16;
-                        xQueueSend(queueOledCmd, &oledResponseNbrPhotoValue, 0);
-                        xQueueSend(queueOledCmd, &indexNbrOfPhoto, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseNbrPhotoValue, 0);
+                        xQueueSend(nikon->queueOledCmd, &indexNbrOfPhoto, 0);
 
                         int oledResponseExpoPasValue = 17;
-                        xQueueSend(queueOledCmd, &oledResponseExpoPasValue, 0);
-                        xQueueSend(queueOledCmd, &indexExpPas, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseExpoPasValue, 0);
+                        xQueueSend(nikon->queueOledCmd, &indexExpPas, 0);
 
                         int oledResponseExpoOffsetValue = 18;
-                        xQueueSend(queueOledCmd, &oledResponseExpoOffsetValue, 0);
-                        xQueueSend(queueOledCmd, &indexExpOffset, 0);
-                    } else if (oledChangeMod == 12 && queueOledCmd != nullptr) {  // TimeLapse
-                        xQueueSend(queueOledCmd, &oledChangeMod, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseExpoOffsetValue, 0);
+                        xQueueSend(nikon->queueOledCmd, &indexExpOffset, 0);
+                    } else if (oledChangeMod == 12 && nikon->queueOledCmd != nullptr) {  // TimeLapse
+                        xQueueSend(nikon->queueOledCmd, &oledChangeMod, 0);
 
                         int oledResponseParaFixValue = 23;
-                        xQueueSend(queueOledCmd, &oledResponseParaFixValue, 0);
-                        xQueueSend(queueOledCmd, &indexParaFixTimeLapse, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFixValue, 0);
+                        xQueueSend(nikon->queueOledCmd, &indexParaFixTimeLapse, 0);
 
                         int oledResponseParaInitLen = 24;
-                        xQueueSend(queueOledCmd, &oledResponseParaInitLen, 0);
-                        xQueueSend(queueOledCmd, &initLength, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseParaInitLen, 0);
+                        xQueueSend(nikon->queueOledCmd, &initLength, 0);
 
                         int oledResponseParaFinalLen = 25;
-                        xQueueSend(queueOledCmd, &oledResponseParaFinalLen, 0);
-                        xQueueSend(queueOledCmd, &finalLength, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFinalLen, 0);
+                        xQueueSend(nikon->queueOledCmd, &finalLength, 0);
 
                         int oledResponseParaFps = 26;
-                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                        xQueueSend(queueOledCmd, &fps, 0);
+                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                        xQueueSend(nikon->queueOledCmd, &fps, 0);
 
                     } else {
-                        if (queueOledCmd != nullptr)
-                            xQueueSend(queueOledCmd, &oledChangeMod, 0);
+                        if (nikon->queueOledCmd != nullptr)
+                            xQueueSend(nikon->queueOledCmd, &oledChangeMod, 0);
                     }
                     break;
                 }
@@ -98,20 +102,20 @@ void modCamCode(void *pvParameters) {
                         switch (paraHdrIndex) {
                             case HDR_PARA_NBR_PHOTO: {
                                 int oledResponseNbrPhoto = 13;
-                                if (queueOledCmd != nullptr)
-                                    xQueueSend(queueOledCmd, &oledResponseNbrPhoto, 0);
+                                if (nikon->queueOledCmd != nullptr)
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseNbrPhoto, 0);
                                 break;
                             }
                             case HDR_PARA_EXP_PAS: {
                                 int oledResponseExpPas = 14;
-                                if (queueOledCmd != nullptr)
-                                    xQueueSend(queueOledCmd, &oledResponseExpPas, 0);
+                                if (nikon->queueOledCmd != nullptr)
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseExpPas, 0);
                                 break;
                             }
                             case HDR_PARA_EXP_OFFSET: {
                                 int oledResponseExpOffset = 15;
-                                if (queueOledCmd != nullptr)
-                                    xQueueSend(queueOledCmd, &oledResponseExpOffset, 0);
+                                if (nikon->queueOledCmd != nullptr)
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseExpOffset, 0);
                                 break;
                             }
                             default:
@@ -124,26 +128,26 @@ void modCamCode(void *pvParameters) {
                             switch (paraTimeLapseIndex) {
                                 case TIMELAPSE_PARA_FIX: {
                                     int oledResponseParaFix = 19;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseParaFix, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFix, 0);
                                     break;
                                 }
                                 case TIMELAPSE_PARA_INITIAL_LENGTH: {
                                     int oledResponseInitLen = 20;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseInitLen, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseInitLen, 0);
                                     break;
                                 }
                                 case TIMELAPSE_PARA_FINAL_LENGTH: {
                                     int oledResponseFinalLen = 21;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseFinalLen, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseFinalLen, 0);
                                     break;
                                 }
                                 case TIMELAPSE_PARA_FPS: {
                                     int oledResponseFps = 22;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseFps, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseFps, 0);
                                     break;
                                 }
                                 default:
@@ -156,20 +160,20 @@ void modCamCode(void *pvParameters) {
                             switch (paraTimeLapseIndex) {
                                 case TIMELAPSE_PARA_FIX: {
                                     int oledResponseParaFix = 19;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseParaFix, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFix, 0);
                                     break;
                                 }
                                 case TIMELAPSE_PARA_MULT_FAC: {
                                     int oledResponseMultFac = 29;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseMultFac, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseMultFac, 0);
                                     break;
                                 }
                                 case TIMELAPSE_PARA_MULT_FPS: {
                                     int oledResponseMultFps = 30;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseMultFps, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseMultFps, 0);
                                     break;
                                 }
                                 default:
@@ -181,14 +185,14 @@ void modCamCode(void *pvParameters) {
                             switch (paraTimeLapseIndex) {
                                 case TIMELAPSE_PARA_FIX: {
                                     int oledResponseParaFix = 32;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseParaFix, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFix, 0);
                                     break;
                                 }
                                 case TIMELAPSE_PARA_RAW_DELAY: {
                                     int oledResponseRawDelay = 31;
-                                    if (queueOledCmd != nullptr)
-                                        xQueueSend(queueOledCmd, &oledResponseRawDelay, 0);
+                                    if (nikon->queueOledCmd != nullptr)
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseRawDelay, 0);
                                     break;
                                 }
                                 default:
@@ -205,27 +209,27 @@ void modCamCode(void *pvParameters) {
                             case HDR_PARA_NBR_PHOTO: {
                                 int oledResponseNbrPhotoValue = 16;
                                 indexNbrOfPhoto = _max(indexNbrOfPhoto - 1, 0);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseNbrPhotoValue, 0);
-                                    xQueueSend(queueOledCmd, &indexNbrOfPhoto, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseNbrPhotoValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexNbrOfPhoto, 0);
                                 }
                                 break;
                             }
                             case HDR_PARA_EXP_PAS: {
                                 int oledResponseExpoPasValue = 17;
                                 indexExpPas = _max(indexExpPas - 1, 0);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseExpoPasValue, 0);
-                                    xQueueSend(queueOledCmd, &indexExpPas, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseExpoPasValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexExpPas, 0);
                                 }
                                 break;
                             }
                             case HDR_PARA_EXP_OFFSET: {
                                 int oledResponseExpoOffsetValue = 18;
                                 indexExpOffset = _max(indexExpOffset - 1, 0);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseExpoOffsetValue, 0);
-                                    xQueueSend(queueOledCmd, &indexExpOffset, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseExpoOffsetValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexExpOffset, 0);
                                 }
                                 break;
                             }
@@ -239,38 +243,38 @@ void modCamCode(void *pvParameters) {
                                 //    break;
                                 int oledResponseParaFixValue = 23;
                                 indexParaFixTimeLapse = _max(indexParaFixTimeLapse - 1, 0);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseParaFixValue, 0);
-                                    xQueueSend(queueOledCmd, &indexParaFixTimeLapse, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseParaFixValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexParaFixTimeLapse, 0);
                                     if (indexParaFixTimeLapse == 0) {
                                         int oledResponseParaFixValue = 23;
-                                        xQueueSend(queueOledCmd, &oledResponseParaFixValue, 0);
-                                        xQueueSend(queueOledCmd, &indexParaFixTimeLapse, 0);
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFixValue, 0);
+                                        xQueueSend(nikon->queueOledCmd, &indexParaFixTimeLapse, 0);
 
                                         int oledResponseParaInitLen = 24;
-                                        xQueueSend(queueOledCmd, &oledResponseParaInitLen, 0);
-                                        xQueueSend(queueOledCmd, &initLength, 0);
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaInitLen, 0);
+                                        xQueueSend(nikon->queueOledCmd, &initLength, 0);
 
                                         int oledResponseParaFinalLen = 25;
-                                        xQueueSend(queueOledCmd, &oledResponseParaFinalLen, 0);
-                                        xQueueSend(queueOledCmd, &finalLength, 0);
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFinalLen, 0);
+                                        xQueueSend(nikon->queueOledCmd, &finalLength, 0);
 
                                         int oledResponseParaFps = 26;
-                                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                        xQueueSend(queueOledCmd, &fps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &fps, 0);
                                     } else if (indexParaFixTimeLapse == 2) {
                                         Serial.println("indexParaFixTimeLapse==2");
                                         int oledResponseParaRawDelay = 33;
-                                        xQueueSend(queueOledCmd, &oledResponseParaRawDelay, 0);
-                                        xQueueSend(queueOledCmd, &rawDelay, 0);
-                                    } else if (indexParaFixTimeLapse == 1 && queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaRawDelay, 0);
+                                        xQueueSend(nikon->queueOledCmd, &rawDelay, 0);
+                                    } else if (indexParaFixTimeLapse == 1 && nikon->queueOledCmd != nullptr) {
                                         int oledResponseParaMultFac = 34;
-                                        xQueueSend(queueOledCmd, &oledResponseParaMultFac, 0);
-                                        xQueueSend(queueOledCmd, &multFactor, 0);
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaMultFac, 0);
+                                        xQueueSend(nikon->queueOledCmd, &multFactor, 0);
 
                                         int oledResponseParaFps = 35;
-                                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                        xQueueSend(queueOledCmd, &fps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &fps, 0);
                                     }
                                 }
 
@@ -281,23 +285,23 @@ void modCamCode(void *pvParameters) {
                                 if (indexParaFixTimeLapse == 0) {  //initial length
                                     int oledResponseParaInitLen = 24;
                                     initLength = _max(initLength - 5, 5);
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaInitLen, 0);
-                                        xQueueSend(queueOledCmd, &initLength, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaInitLen, 0);
+                                        xQueueSend(nikon->queueOledCmd, &initLength, 0);
                                     }
                                 } else if (indexParaFixTimeLapse == 2) {  // Raw delay
                                     int oledResponseParaRawDelay = 33;
                                     rawDelay = _max(rawDelay - 500, 500);
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaRawDelay, 0);
-                                        xQueueSend(queueOledCmd, &rawDelay, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaRawDelay, 0);
+                                        xQueueSend(nikon->queueOledCmd, &rawDelay, 0);
                                     }
                                 } else if (indexParaFixTimeLapse == 1) {  // Mult factor
                                     int oledResponseParaMultFac = 34;
                                     multFactor = _max(multFactor - 1, 2);
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaMultFac, 0);
-                                        xQueueSend(queueOledCmd, &multFactor, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaMultFac, 0);
+                                        xQueueSend(nikon->queueOledCmd, &multFactor, 0);
                                     }
                                 }
 
@@ -308,16 +312,16 @@ void modCamCode(void *pvParameters) {
                                 if (indexParaFixTimeLapse == 0) {  //final length
                                     int oledResponseParaFinalLen = 25;
                                     finalLength = _max(finalLength - 5, 5);
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaFinalLen, 0);
-                                        xQueueSend(queueOledCmd, &finalLength, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFinalLen, 0);
+                                        xQueueSend(nikon->queueOledCmd, &finalLength, 0);
                                     }
                                 } else if (indexParaFixTimeLapse == 1) {  // Fps
                                     int oledResponseParaFps = 35;
                                     fps = _max(fps - 1, 1);
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                        xQueueSend(queueOledCmd, &fps, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &fps, 0);
                                     }
                                 }
 
@@ -328,9 +332,9 @@ void modCamCode(void *pvParameters) {
                                 if (indexParaFixTimeLapse == 0) {  //fps
                                     int oledResponseParaFps = 26;
                                     fps = _max(fps - 1, 1);
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                        xQueueSend(queueOledCmd, &fps, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &fps, 0);
                                     }
                                 }
 
@@ -350,27 +354,27 @@ void modCamCode(void *pvParameters) {
                             case HDR_PARA_NBR_PHOTO: {
                                 int oledResponseNbrPhotoValue = 16;
                                 indexNbrOfPhoto = _min(indexNbrOfPhoto + 1, sizeof(HdrNbrPhotoArray) - 1);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseNbrPhotoValue, 0);
-                                    xQueueSend(queueOledCmd, &indexNbrOfPhoto, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseNbrPhotoValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexNbrOfPhoto, 0);
                                 }
                                 break;
                             }
                             case HDR_PARA_EXP_PAS: {
                                 int oledResponseExpoPasValue = 17;
                                 indexExpPas = _min(indexExpPas + 1, sizeof(HdrExpPasArray) / sizeof(float) - 1);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseExpoPasValue, 0);
-                                    xQueueSend(queueOledCmd, &indexExpPas, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseExpoPasValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexExpPas, 0);
                                 }
                                 break;
                             }
                             case HDR_PARA_EXP_OFFSET: {
                                 int oledResponseExpoOffsetValue = 18;
                                 indexExpOffset = _min(indexExpOffset + 1, sizeof(LIST_EXP_BIAS_COMP) / sizeof(LIST_EXP_BIAS_COMP[1]) - 1);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseExpoOffsetValue, 0);
-                                    xQueueSend(queueOledCmd, &indexExpOffset, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseExpoOffsetValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexExpOffset, 0);
                                 }
                                 break;
                             }
@@ -384,23 +388,23 @@ void modCamCode(void *pvParameters) {
                                 //    break;
                                 int oledResponseParaFixValue = 23;
                                 indexParaFixTimeLapse = _min(indexParaFixTimeLapse + 1, 2);
-                                if (queueOledCmd != nullptr) {
-                                    xQueueSend(queueOledCmd, &oledResponseParaFixValue, 0);
-                                    xQueueSend(queueOledCmd, &indexParaFixTimeLapse, 0);
+                                if (nikon->queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseParaFixValue, 0);
+                                    xQueueSend(nikon->queueOledCmd, &indexParaFixTimeLapse, 0);
                                 }
-                                if (indexParaFixTimeLapse == 2 && queueOledCmd != nullptr) {
+                                if (indexParaFixTimeLapse == 2 && nikon->queueOledCmd != nullptr) {
                                     Serial.println("indexParaFixTimeLapse==2");
                                     int oledResponseParaRawDelay = 33;
-                                    xQueueSend(queueOledCmd, &oledResponseParaRawDelay, 0);
-                                    xQueueSend(queueOledCmd, &rawDelay, 0);
-                                } else if (indexParaFixTimeLapse == 1 && queueOledCmd != nullptr) {
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseParaRawDelay, 0);
+                                    xQueueSend(nikon->queueOledCmd, &rawDelay, 0);
+                                } else if (indexParaFixTimeLapse == 1 && nikon->queueOledCmd != nullptr) {
                                     int oledResponseParaMultFac = 34;
-                                    xQueueSend(queueOledCmd, &oledResponseParaMultFac, 0);
-                                    xQueueSend(queueOledCmd, &multFactor, 0);
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseParaMultFac, 0);
+                                    xQueueSend(nikon->queueOledCmd, &multFactor, 0);
 
                                     int oledResponseParaFps = 35;
-                                    xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                    xQueueSend(queueOledCmd, &fps, 0);
+                                    xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                    xQueueSend(nikon->queueOledCmd, &fps, 0);
                                 }
                                 break;
                             }
@@ -409,23 +413,23 @@ void modCamCode(void *pvParameters) {
                                 if (indexParaFixTimeLapse == 0) {  //initial final length
                                     int oledResponseParaInitLen = 24;
                                     initLength += 5;
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaInitLen, 0);
-                                        xQueueSend(queueOledCmd, &initLength, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaInitLen, 0);
+                                        xQueueSend(nikon->queueOledCmd, &initLength, 0);
                                     }
                                 } else if (indexParaFixTimeLapse == 2) {  // Raw delay
                                     int oledResponseParaRawDelay = 33;
                                     rawDelay += 500;
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaRawDelay, 0);
-                                        xQueueSend(queueOledCmd, &rawDelay, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaRawDelay, 0);
+                                        xQueueSend(nikon->queueOledCmd, &rawDelay, 0);
                                     }
                                 } else if (indexParaFixTimeLapse == 1) {  // Mult factor
                                     int oledResponseParaMultFac = 34;
                                     multFactor++;
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaMultFac, 0);
-                                        xQueueSend(queueOledCmd, &multFactor, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaMultFac, 0);
+                                        xQueueSend(nikon->queueOledCmd, &multFactor, 0);
                                     }
                                 }
 
@@ -436,16 +440,16 @@ void modCamCode(void *pvParameters) {
                                 if (indexParaFixTimeLapse == 0) {  //final length
                                     int oledResponseParaFinalLen = 25;
                                     finalLength += 5;
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaFinalLen, 0);
-                                        xQueueSend(queueOledCmd, &finalLength, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFinalLen, 0);
+                                        xQueueSend(nikon->queueOledCmd, &finalLength, 0);
                                     }
                                 } else if (indexParaFixTimeLapse == 1) {  // Fps
                                     int oledResponseParaFps = 35;
                                     fps++;
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                        xQueueSend(queueOledCmd, &fps, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &fps, 0);
                                     }
                                 }
 
@@ -457,9 +461,9 @@ void modCamCode(void *pvParameters) {
                                 if (indexParaFixTimeLapse == 0) {  //fps
                                     int oledResponseParaFps = 26;
                                     fps += 1;
-                                    if (queueOledCmd != nullptr) {
-                                        xQueueSend(queueOledCmd, &oledResponseParaFps, 0);
-                                        xQueueSend(queueOledCmd, &fps, 0);
+                                    if (nikon->queueOledCmd != nullptr) {
+                                        xQueueSend(nikon->queueOledCmd, &oledResponseParaFps, 0);
+                                        xQueueSend(nikon->queueOledCmd, &fps, 0);
                                     }
                                 }
 
@@ -499,7 +503,7 @@ void modCamCode(void *pvParameters) {
                         case TIMELAPSE_MODE: {
                             if (timelapseEnable) {
                                 int oledResponseStopTimeLapse = 27;
-                                xQueueSend(queueOledCmd, &oledResponseStopTimeLapse, 0);
+                                xQueueSend(nikon->queueOledCmd, &oledResponseStopTimeLapse, 0);
 
                                 COMMANDE_DSLR commande;
                                 commande.para1 = 1;  // Stop timelapse
@@ -510,7 +514,7 @@ void modCamCode(void *pvParameters) {
                                 Serial.printf("timerGoal %d\n", delayTimelapse);
 
                                 int oledResponseStartTimeLapse = 28;
-                                xQueueSend(queueOledCmd, &oledResponseStartTimeLapse, 0);
+                                xQueueSend(nikon->queueOledCmd, &oledResponseStartTimeLapse, 0);
 
                                 COMMANDE_DSLR commande;
                                 commande.para1 = 2;  // Start timelapse
@@ -523,7 +527,7 @@ void modCamCode(void *pvParameters) {
                                 Serial.printf("timerGoal %d\n", delayTimelapse);
 
                                 int oledResponseStartTimeLapse = 28;
-                                xQueueSend(queueOledCmd, &oledResponseStartTimeLapse, 0);
+                                xQueueSend(nikon->queueOledCmd, &oledResponseStartTimeLapse, 0);
 
                                 COMMANDE_DSLR commande;
                                 commande.para1 = 2;  // Start timelapse
@@ -536,7 +540,7 @@ void modCamCode(void *pvParameters) {
                                 Serial.printf("timerGoal %d\n", delayTimelapse);
 
                                 int oledResponseStartTimeLapse = 28;
-                                xQueueSend(queueOledCmd, &oledResponseStartTimeLapse, 0);
+                                xQueueSend(nikon->queueOledCmd, &oledResponseStartTimeLapse, 0);
 
                                 COMMANDE_DSLR commande;
                                 commande.para1 = 2;  // Start timelapse

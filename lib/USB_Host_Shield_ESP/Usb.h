@@ -31,11 +31,10 @@ e-mail   :  support@circuitsathome.com
 #include <stdio.h>
 
 // None of these should ever be included by a driver, or a user's sketch.
-#include "settings.h"
-#include "printhex.h"
-#include "message.h"
-#include "hexdump.h"
-#include "sink_parser.h"
+#include <SPI.h> 
+#include <Arduino.h>   //Fait
+#include "printhex.h"  //Fait
+#include "message.h"   //Fait
 #include "max3421e.h"
 #include "address.h"
 #include "avrpins.h"

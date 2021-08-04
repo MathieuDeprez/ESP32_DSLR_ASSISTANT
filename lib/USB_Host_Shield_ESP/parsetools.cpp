@@ -25,7 +25,7 @@ e-mail   :  support@circuitsathome.com
 
 bool MultiByteValueParser::Parse(uint8_t **pp, uint16_t *pcntdn) {
         if(!pBuf) {
-                Notify(PSTR("Buffer pointer is NULL!\r\n"), 0x80);
+                E_Notify(PSTR("Buffer pointer is NULL!\r\n"), 0x80);
                 return false;
         }
         for(; countDown && (*pcntdn); countDown--, (*pcntdn)--, (*pp)++)

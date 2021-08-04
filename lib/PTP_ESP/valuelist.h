@@ -84,7 +84,7 @@ class EEPROMByteList {
     uint8_t listSize;
 
     uint16_t GetValueAddress(uint8_t val) {
-        uint16_t tail = listOffset + listSize + 2;
+        //uint16_t tail = listOffset + listSize + 2;
 
         Serial.print("\n/// val01: ");
         Serial.println(val);
@@ -124,7 +124,7 @@ class EEPROMByteList {
 
     void Set(uint8_t i, uint8_t val) {
         if (i < listSize) {
-            uint16_t pos = listOffset + i + 1;
+            //uint16_t pos = listOffset + i + 1;
 
             Serial.print("\n/// val02: ");
             Serial.println(val);
@@ -137,7 +137,7 @@ class EEPROMByteList {
     uint8_t GetNext(uint8_t val, uint8_t di = 1) {
         uint16_t addr = GetValueAddress(val);
 
-        uint16_t tail = listOffset + listSize;
+        //uint16_t tail = listOffset + listSize;
 
         Serial.print("\n/// val02: ");
         Serial.println(val);

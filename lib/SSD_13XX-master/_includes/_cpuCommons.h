@@ -54,7 +54,5 @@
 		#endif
 	#endif
 
-	#if defined(_FORCE_PROGMEM__)
-		template <typename T> T PROGMEM_read (const T * sce) { static T temp; memcpy_P (&temp, sce, sizeof (T)); return temp; }
-	#endif
+
 #endif
